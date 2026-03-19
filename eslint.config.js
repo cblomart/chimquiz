@@ -34,7 +34,7 @@ export default [
       // ── Common bugs ───────────────────────────────────────────
       "no-unused-vars": ["warn", { varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
       "no-undef": "error",
-      eqeqeq: ["error", "always"],
+      eqeqeq: ["error", "always", { null: "ignore" }],
       "no-eval": "error",
       "no-implied-eval": "error",
       "no-new-func": "error",

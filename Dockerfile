@@ -7,10 +7,17 @@ RUN dotnet publish ChimQuiz/ChimQuiz.csproj -c Release -o /app/publish --no-rest
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
-RUN mkdir -p /data && chmod 777 /data
-COPY --from=build /app/publish .
+
+# Run as non-root user (DS-0002 best practice)
+RUN addgroup --system chimquiz && adduser --system --ingroup chimquiz chimquiz \
+    && mkdir -p /data && chown chimquiz:chimquiz /data
+
+COPY --from=build --chown=chimquiz:chimquiz /app/publish .
+
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DatabasePath=/data/chimquiz.db
+
+USER chimquiz
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "ChimQuiz.dll"]

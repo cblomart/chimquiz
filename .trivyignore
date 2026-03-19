@@ -1,0 +1,2 @@
+# Ignore build output directories (not in repo, only present locally)
+# These are covered by .gitignore but trivy scans the filesystem

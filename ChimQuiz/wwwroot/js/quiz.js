@@ -149,7 +149,36 @@ async function loadNextQuestion() {
     renderQuestion(currentQuestion);
 }
 
+function setupTypedInput() {
+    const typedInput = document.getElementById('typed-answer');
+    const submitBtn  = document.getElementById('submit-typed');
+    if (typedInput) {
+        typedInput.value    = '';
+        typedInput.disabled = false;
+        typedInput.className = 'typed-answer-input';
+        setTimeout(() => typedInput.focus(), 350);
+    }
+    if (submitBtn) submitBtn.disabled = false;
+}
+
+function setupMCQButtons(choices) {
+    const letters = ['A', 'B', 'C', 'D'];
+    for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById(`choice-${i}`);
+        if (!btn) continue;
+        btn.className = 'choice-btn';
+        btn.disabled  = false;
+        btn.dataset.value = choices[i] || '';
+        const textEl   = btn.querySelector('.choice-text');
+        const letterEl = btn.querySelector('.choice-letter');
+        if (textEl)   textEl.textContent   = choices[i] || '';
+        if (letterEl) letterEl.textContent = letters[i];
+    }
+}
+
 function renderQuestion(q) {
+    const isTyped = q.type === 'SymbolToNameTyped';
+
     const promptEl    = document.getElementById('question-prompt');
     const displayEl   = document.getElementById('display-value');
     const counterEl   = document.getElementById('question-counter');
@@ -158,49 +187,23 @@ function renderQuestion(q) {
     const multEl      = document.getElementById('combo-multiplier');
     const choicesGrid = document.getElementById('choices-grid');
     const typedArea   = document.getElementById('typed-input-area');
-    const typedInput  = document.getElementById('typed-answer');
 
-    if (promptEl)  promptEl.textContent = q.prompt;
-    if (displayEl) displayEl.textContent = q.displayValue;
-    if (counterEl) counterEl.textContent = `Question ${q.questionNumber} / ${q.totalQuestions}`;
+    if (promptEl)    promptEl.textContent    = q.prompt;
+    if (displayEl)   displayEl.textContent   = q.displayValue;
+    if (counterEl)   counterEl.textContent   = `Question ${q.questionNumber} / ${q.totalQuestions}`;
     if (progressBar) progressBar.style.width = `${((q.questionNumber - 1) / q.totalQuestions) * 100}%`;
-    if (xpDisplay) xpDisplay.textContent = `${q.totalXp} XP`;
-    if (multEl)    multEl.textContent     = q.comboMultiplier;
+    if (xpDisplay)   xpDisplay.textContent   = `${q.totalXp} XP`;
+    if (multEl)      multEl.textContent      = q.comboMultiplier;
 
     updateComboDisplay(q.comboCount);
 
-    const isTyped = q.type === 'SymbolToNameTyped';
-
-    // Toggle MCQ vs typed input
     if (choicesGrid) choicesGrid.style.display = isTyped ? 'none' : 'grid';
     if (typedArea)   typedArea.style.display   = isTyped ? 'flex' : 'none';
 
     if (isTyped) {
-        if (typedInput) {
-            typedInput.value = '';
-            typedInput.disabled = false;
-            typedInput.className = 'typed-answer-input';
-            // Auto-focus with slight delay so the card animation finishes
-            setTimeout(() => typedInput.focus(), 350);
-        }
-        const submitBtn = document.getElementById('submit-typed');
-        if (submitBtn) submitBtn.disabled = false;
-
-        // (Enter key handled by persistent listener in initQuizPage)
+        setupTypedInput();
     } else {
-        // Reset MCQ buttons
-        const letters = ['A', 'B', 'C', 'D'];
-        for (let i = 0; i < 4; i++) {
-            const btn = document.getElementById(`choice-${i}`);
-            if (!btn) continue;
-            btn.className = 'choice-btn';
-            btn.disabled  = false;
-            btn.dataset.value = q.choices[i] || '';
-            const textEl   = btn.querySelector('.choice-text');
-            const letterEl = btn.querySelector('.choice-letter');
-            if (textEl)   textEl.textContent   = q.choices[i] || '';
-            if (letterEl) letterEl.textContent = letters[i];
-        }
+        setupMCQButtons(q.choices);
     }
 
     // Animate card in
@@ -215,9 +218,6 @@ function renderQuestion(q) {
     startQuestionTimer(isTyped ? ANSWER_TIME_TYPED : ANSWER_TIME_MCQ);
 }
 
-function handleTypedKeydown(e) {
-    if (e.key === 'Enter') submitTypedAnswer();
-}
 
 // ── Answer submission ─────────────────────────────────────────────────────────
 
@@ -348,17 +348,38 @@ const INFO_DISPLAY_SECONDS = 12;
 const BONUS_XP_THRESHOLD_MS = 6000; // stay ≥6s → show bonus XP visual
 let cardShownAt = 0;
 
+function renderVerdict(result) {
+    const verdict = document.getElementById('answer-verdict');
+    if (!verdict) return;
+    if (result._isTimeout) {
+        verdict.textContent = `⏱️ Temps écoulé ! Réponse : ${result.correctAnswer}`;
+        verdict.className   = 'answer-verdict verdict-incorrect';
+    } else if (result.isCorrect && result.wasFuzzyMatch) {
+        verdict.textContent = '✅ Presque parfait !';
+        verdict.className   = 'answer-verdict verdict-fuzzy';
+    } else if (result.isCorrect) {
+        verdict.textContent = result.comboMessage || '✅ Correct !';
+        verdict.className   = 'answer-verdict verdict-correct';
+    } else {
+        verdict.textContent = `❌ Réponse : ${result.correctAnswer}`;
+        verdict.className   = 'answer-verdict verdict-incorrect';
+    }
+}
+
+function renderSpellingCorrection(result) {
+    const block   = document.getElementById('spelling-correction');
+    const given   = document.getElementById('spelling-given');
+    const correct = document.getElementById('spelling-correct');
+    const show    = result.isCorrect && result.wasFuzzyMatch && result._givenAnswer;
+    if (show) {
+        if (given)   given.textContent   = result._givenAnswer;
+        if (correct) correct.textContent = result.correctAnswer;
+    }
+    if (block) block.style.display = show ? 'flex' : 'none';
+}
+
 function showInfoCard(result) {
     const card      = document.getElementById('element-info-card');
-    const symbol    = document.getElementById('info-symbol');
-    const atomNum   = document.getElementById('info-atomic-number');
-    const name      = document.getElementById('info-name');
-    const verdict   = document.getElementById('answer-verdict');
-    const useText   = document.getElementById('info-use-text');
-    const where     = document.getElementById('info-where-text');
-    const factBlock = document.getElementById('info-fact-block');
-    const factTxt   = document.getElementById('info-fact-text');
-
     if (!card) return;
 
     // Hide question UI — card takes their place
@@ -367,67 +388,41 @@ function showInfoCard(result) {
         if (el) el.style.visibility = 'hidden';
     });
 
-    // Populate element identity
+    // Element identity
+    const symbol  = document.getElementById('info-symbol');
+    const atomNum = document.getElementById('info-atomic-number');
+    const name    = document.getElementById('info-name');
     if (symbol)  symbol.textContent  = result.elementSymbol;
     if (atomNum) atomNum.textContent = `#${currentQuestion?.elementId ?? ''}`;
     if (name)    name.textContent    = result.elementName;
 
-    // Verdict badge
-    if (verdict) {
-        if (result._isTimeout) {
-            verdict.textContent = `⏱️ Temps écoulé ! Réponse : ${result.correctAnswer}`;
-            verdict.className   = 'answer-verdict verdict-incorrect';
-        } else if (result.isCorrect && result.wasFuzzyMatch) {
-            verdict.textContent = `✅ Presque parfait !`;
-            verdict.className   = 'answer-verdict verdict-fuzzy';
-        } else if (result.isCorrect) {
-            verdict.textContent = result.comboMessage || '✅ Correct !';
-            verdict.className   = 'answer-verdict verdict-correct';
-        } else {
-            verdict.textContent = `❌ Réponse : ${result.correctAnswer}`;
-            verdict.className   = 'answer-verdict verdict-incorrect';
-        }
-    }
+    renderVerdict(result);
+    renderSpellingCorrection(result);
 
-    // Spelling correction block — shown on fuzzy match with the given answer highlighted
-    const spellingBlock   = document.getElementById('spelling-correction');
-    const spellingGiven   = document.getElementById('spelling-given');
-    const spellingCorrect = document.getElementById('spelling-correct');
-    if (result.isCorrect && result.wasFuzzyMatch && result._givenAnswer) {
-        if (spellingGiven)   spellingGiven.textContent   = result._givenAnswer;
-        if (spellingCorrect) spellingCorrect.textContent = result.correctAnswer;
-        if (spellingBlock)   spellingBlock.style.display = 'flex';
-    } else {
-        if (spellingBlock) spellingBlock.style.display = 'none';
-    }
-
-    // Bonus XP for perfect spelling on typed questions
     if (result.isTyped && result.isCorrect && !result.wasFuzzyMatch) {
         animateXpGain(3, '✍️ Parfait !');
     }
 
-    // Fun fact — hero block
+    // Fun fact hero block
+    const factBlock = document.getElementById('info-fact-block');
+    const factTxt   = document.getElementById('info-fact-text');
     if (factTxt && result.funFact) {
         factTxt.textContent = result.funFact;
-        if (factBlock) factBlock.style.display = 'block';
-    } else {
-        if (factBlock) factBlock.style.display = 'none';
     }
+    if (factBlock) factBlock.style.display = result.funFact ? 'block' : 'none';
 
+    const useText = document.getElementById('info-use-text');
+    const where   = document.getElementById('info-where-text');
     if (useText) useText.textContent = result.commonUse   || '';
     if (where)   where.textContent   = result.whereToFind || '';
 
-    // Record when card was shown (for bonus XP detection)
     cardShownAt = Date.now();
-
-    // Show card with animation
     card.style.display = 'flex';
     card.style.animation = 'none';
     void card.offsetHeight;
     card.style.animation = 'slideUp 0.35s ease forwards';
 
     startInfoTimer(INFO_DISPLAY_SECONDS);
-    // Auto-advance after info card timer — scheduled here so it's never cancelled by startInfoTimer
     scheduleNextQuestion(result, INFO_DISPLAY_SECONDS * 1000);
 }
 

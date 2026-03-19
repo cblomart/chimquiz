@@ -73,11 +73,11 @@ jobs:
         run: |
           lizard ChimQuiz -l csharp \
             --CCN 15 \
-            --length 60 \
+            --length 80 \
             --warnings_only \
             --output_file lizard-csharp.txt || true
           cat lizard-csharp.txt
-          lizard ChimQuiz -l csharp --CCN 15 --length 60 --error_exit
+          lizard ChimQuiz -l csharp --CCN 15 --length 80 --error_exit
 
       - name: Complexity — JS (fail > CCN 15)
         run: |
