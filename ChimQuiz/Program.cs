@@ -29,18 +29,20 @@ builder.Services.AddSession(options =>
 });
 
 // ── EF Core / SQLite ─────────────────────────────────────────────────────────
-// Azure Files SMB doesn't support POSIX byte-range locks used by SQLite.
-// A single persistent connection with journal_mode=MEMORY + locking_mode=EXCLUSIVE
-// avoids lock files and uses whole-file locking, which SMB handles correctly.
-// All DbContext instances share this one connection to prevent lock conflicts.
+// Azure Files SMB doesn't support POSIX fcntl advisory locks that SQLite uses
+// for every write commit. Workaround: operate on a local /tmp copy of the DB
+// (where fcntl works) and sync back to Azure Files on shutdown + periodically.
 string dbPath = builder.Configuration["DatabasePath"] ?? "chimquiz.db";
-SqliteConnection sqliteConnection = new($"Data Source={dbPath}");
-sqliteConnection.Open();
-using (SqliteCommand pragmaCmd = sqliteConnection.CreateCommand())
+bool useLocalCopy = OperatingSystem.IsLinux() && Path.IsPathRooted(dbPath);
+string workingDbPath = useLocalCopy ? "/tmp/chimquiz_work.db" : dbPath;
+
+if (useLocalCopy && File.Exists(dbPath))
 {
-    pragmaCmd.CommandText = "PRAGMA journal_mode=MEMORY; PRAGMA locking_mode=EXCLUSIVE;";
-    _ = pragmaCmd.ExecuteNonQuery();
+    File.Copy(dbPath, workingDbPath, overwrite: true);
 }
+
+SqliteConnection sqliteConnection = new($"Data Source={workingDbPath}");
+sqliteConnection.Open();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(sqliteConnection));
 
@@ -109,4 +111,34 @@ using (IServiceScope scope = app.Services.CreateScope())
     _ = db.Database.EnsureCreated();
 }
 
+// ── Azure Files sync ─────────────────────────────────────────────────────────
+// Sync the working DB back to Azure Files on shutdown and every 5 minutes.
+if (useLocalCopy)
+{
+    app.Lifetime.ApplicationStopping.Register(SyncToAzureFiles);
+
+    _ = Task.Run(async () =>
+    {
+        using PeriodicTimer timer = new(TimeSpan.FromMinutes(5));
+        while (await timer.WaitForNextTickAsync())
+        {
+            SyncToAzureFiles();
+        }
+    });
+}
+
 app.Run();
+
+void SyncToAzureFiles()
+{
+    try
+    {
+        using SqliteCommand cmd = sqliteConnection.CreateCommand();
+        cmd.CommandText = $"VACUUM INTO '{dbPath}'";
+        _ = cmd.ExecuteNonQuery();
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"[chimquiz] Azure Files sync failed: {ex.Message}");
+    }
+}
