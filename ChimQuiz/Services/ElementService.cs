@@ -46,7 +46,7 @@ namespace ChimQuiz.Services
                 .Where(e => char.ToUpperInvariant(e.Symbol[0]) == firstChar || e.Symbol.Length == refLen)
                 .ToList();
 
-            List<Element> result = new List<Element>();
+            List<Element> result = [];
 
             // Take as many confusable as possible, fill remainder with random
             PickInto(confusable, Math.Min(count, confusable.Count), result);
@@ -78,7 +78,7 @@ namespace ChimQuiz.Services
                             Math.Abs(e.Name.Length - refLen) <= 3)
                 .ToList();
 
-            List<Element> result = new List<Element>();
+            List<Element> result = [];
 
             PickInto(confusable, Math.Min(count, confusable.Count), result);
             if (result.Count < count)
@@ -107,7 +107,7 @@ namespace ChimQuiz.Services
         /// </summary>
         public Element GetWeightedRandom(IEnumerable<int> excludeAtomicNumbers, int maxAtomicNumber = 118)
         {
-            HashSet<int> excludeSet = new HashSet<int>(excludeAtomicNumbers);
+            HashSet<int> excludeSet = new(excludeAtomicNumbers);
             int midpoint = maxAtomicNumber / 2;
 
             List<Element> lowPool = _elements.Where(e => e.AtomicNumber <= midpoint && e.AtomicNumber <= maxAtomicNumber && !excludeSet.Contains(e.AtomicNumber)).ToList();

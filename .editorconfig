@@ -22,6 +22,12 @@ dotnet_diagnostic.CA1822.severity = suggestion   # Mark members as static
 dotnet_diagnostic.CA2007.severity = none          # ConfigureAwait (web apps don't need it)
 dotnet_diagnostic.ASP0015.severity = suggestion   # Typed header properties — not available for all headers
 dotnet_diagnostic.SCS0008.severity = suggestion   # Cookie Secure flag — app runs behind HTTPS proxy
+dotnet_diagnostic.IDE0028.severity = none         # Collection initializer style — SDK version dependent
+dotnet_diagnostic.IDE0090.severity = none         # Target-typed new — SDK version dependent
+dotnet_diagnostic.IDE0305.severity = none         # Collection expression — SDK version dependent
+dotnet_diagnostic.IDE0306.severity = none         # Collection expression — SDK version dependent
+dotnet_diagnostic.IDE0052.severity = none         # Unused assigned member — already cleaned up
+dotnet_diagnostic.IDE0046.severity = none         # Use conditional expression — readability preference
 
 # ── SecurityCodeScan ──────────────────────────────────────────────────────────
 dotnet_diagnostic.SCS0005.severity = suggestion    # Weak random — game logic only, not cryptographic

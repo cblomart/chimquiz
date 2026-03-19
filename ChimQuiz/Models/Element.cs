@@ -414,7 +414,7 @@ namespace ChimQuiz.Models
 
         private static System.Collections.ObjectModel.ReadOnlyCollection<Element> ParseElements()
         {
-            List<Element> list = new List<Element>(120);
+            List<Element> list = new(120);
             foreach (string line in CsvData.Split('\n', StringSplitOptions.RemoveEmptyEntries))
             {
                 string trimmed = line.Trim();

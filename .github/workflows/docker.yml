@@ -76,7 +76,8 @@ jobs:
             --warnings_only \
             --output_file lizard-csharp.txt || true
           cat lizard-csharp.txt
-          lizard ChimQuiz -l csharp --CCN 15 -E
+          if [ -s lizard-csharp.txt ]; then echo "❌ CCN violations found"; exit 1; fi
+          echo "✅ No CCN violations"
 
       - name: Complexity — JS (fail > CCN 15)
         run: |
@@ -86,7 +87,8 @@ jobs:
             --warnings_only \
             --output_file lizard-js.txt || true
           cat lizard-js.txt
-          lizard ChimQuiz/wwwroot/js -l javascript --CCN 15 --length 80 -E
+          if [ -s lizard-js.txt ]; then echo "❌ CCN violations found"; exit 1; fi
+          echo "✅ No CCN violations"
 
       - name: Upload complexity reports
         if: always()

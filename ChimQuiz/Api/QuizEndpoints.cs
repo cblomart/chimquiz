@@ -37,17 +37,17 @@ namespace ChimQuiz.Api
             return question is null
                 ? Results.NotFound(new { error = "Aucune session active" })
                 : Results.Ok(new
-            {
-                question.Prompt,
-                question.DisplayValue,
-                question.Choices,
-                Type = question.Type.ToString(),
-                QuestionNumber = index + 1,
-                TotalQuestions = total,
-                ComboCount = combo,
-                TotalXp = totalXp,
-                ComboMultiplier = combo switch { >= 8 => "x3", >= 5 => "x2", >= 3 => "x1.5", _ => "x1" }
-            });
+                {
+                    question.Prompt,
+                    question.DisplayValue,
+                    question.Choices,
+                    Type = question.Type.ToString(),
+                    QuestionNumber = index + 1,
+                    TotalQuestions = total,
+                    ComboCount = combo,
+                    TotalXp = totalXp,
+                    ComboMultiplier = combo switch { >= 8 => "x3", >= 5 => "x2", >= 3 => "x1.5", _ => "x1" }
+                });
         }
 
         private static async Task<IResult> SubmitAnswer(

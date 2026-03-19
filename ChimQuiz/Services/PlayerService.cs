@@ -40,7 +40,7 @@ namespace ChimQuiz.Services
                 throw new ArgumentException($"Le pseudo '{pseudo}' est déjà utilisé.");
             }
 
-            Player player = new Player { Pseudo = pseudo };
+            Player player = new() { Pseudo = pseudo };
             _ = db.Players.Add(player);
             _ = await db.SaveChangesAsync();
             return player;
@@ -123,7 +123,7 @@ namespace ChimQuiz.Services
             }
 
             // Save game session record
-            GameSession session = new GameSession
+            GameSession session = new()
             {
                 Id = state.SessionId,
                 PlayerId = playerId,

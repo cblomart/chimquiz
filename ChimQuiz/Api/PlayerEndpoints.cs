@@ -27,19 +27,19 @@ namespace ChimQuiz.Api
             return player is null
                 ? Results.NotFound()
                 : Results.Ok(new
-            {
-                player.Id,
-                player.Pseudo,
-                player.TotalXp,
-                player.BestSessionXp,
-                player.CurrentStreak,
-                player.MaxStreak,
-                player.RankName,
-                player.RankEmoji,
-                player.RankProgressPercent,
-                player.XpForCurrentRank,
-                player.XpForNextRank
-            });
+                {
+                    player.Id,
+                    player.Pseudo,
+                    player.TotalXp,
+                    player.BestSessionXp,
+                    player.CurrentStreak,
+                    player.MaxStreak,
+                    player.RankName,
+                    player.RankEmoji,
+                    player.RankProgressPercent,
+                    player.XpForCurrentRank,
+                    player.XpForNextRank
+                });
         }
 
         private static async Task<IResult> CreatePlayer(HttpContext ctx, PlayerService playerService, CreatePlayerRequest? req)

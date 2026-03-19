@@ -42,7 +42,7 @@ namespace ChimQuiz.Services
 
         public QuizSessionState StartNewSession(ISession session, Guid playerId, int playerXp = 0)
         {
-            QuizSessionState state = new QuizSessionState
+            QuizSessionState state = new()
             {
                 PlayerId = playerId,
                 StartedAt = DateTime.UtcNow,
@@ -61,7 +61,7 @@ namespace ChimQuiz.Services
             }
 
             QuizQuestionState q = state.Questions[state.CurrentIndex];
-            QuizQuestionState safeQ = new QuizQuestionState
+            QuizQuestionState safeQ = new()
             {
                 ElementId = q.ElementId,
                 Type = q.Type,
@@ -85,42 +85,8 @@ namespace ChimQuiz.Services
             }
 
             QuizQuestionState q = state.Questions[state.CurrentIndex];
-
-            bool wasFuzzy = false;
-            bool isCorrect;
-            if (q.IsTyped)
-            {
-                string na = Normalize(answer);
-                string nc = Normalize(q.CorrectAnswer);
-                if (na == nc)
-                {
-                    isCorrect = true;
-                }
-                else if (nc.Length >= 5 && LevenshteinDistance(na, nc) == 1)
-                { isCorrect = true; wasFuzzy = true; }
-                else
-                {
-                    isCorrect = false;
-                }
-            }
-            else
-            {
-                isCorrect = string.Equals(answer.Trim(), q.CorrectAnswer, StringComparison.OrdinalIgnoreCase);
-            }
-
-            if (isCorrect)
-            {
-                state.ComboCount++;
-                state.CorrectCount++;
-                if (state.ComboCount > state.MaxCombo)
-                {
-                    state.MaxCombo = state.ComboCount;
-                }
-            }
-            else
-            {
-                state.ComboCount = 0;
-            }
+            (bool isCorrect, bool wasFuzzy) = CheckAnswer(q, answer);
+            UpdateCombo(state, isCorrect);
 
             int xpEarned = isCorrect ? CalculateXp(state.ComboCount) : 0;
             state.TotalXp += xpEarned;
@@ -134,7 +100,6 @@ namespace ChimQuiz.Services
 
             SaveState(session, state);
 
-            // Find the element for info card
             Element? element = elementService.GetById(q.ElementId);
 
             return new AnswerResult
@@ -151,13 +116,52 @@ namespace ChimQuiz.Services
                 IsGameOver = isGameOver,
                 IsTyped = q.IsTyped,
                 WasFuzzyMatch = wasFuzzy,
-                ElementSymbol = q.DisplayValue, // what was shown to the user
+                ElementSymbol = q.DisplayValue,
                 ElementName = element?.Name ?? q.CorrectAnswer,
                 CommonUse = q.CommonUse,
                 WhereToFind = q.WhereToFind,
                 FunFact = q.FunFact,
                 ComboMessage = isCorrect ? GetComboMessage(state.ComboCount) : ""
             };
+        }
+
+        private (bool isCorrect, bool wasFuzzy) CheckAnswer(QuizQuestionState q, string answer)
+        {
+            if (!q.IsTyped)
+            {
+                return (string.Equals(answer.Trim(), q.CorrectAnswer, StringComparison.OrdinalIgnoreCase), false);
+            }
+
+            string na = Normalize(answer);
+            string nc = Normalize(q.CorrectAnswer);
+            if (na == nc)
+            {
+                return (true, false);
+            }
+
+            if (nc.Length >= 5 && LevenshteinDistance(na, nc) == 1)
+            {
+                return (true, true);
+            }
+
+            return (false, false);
+        }
+
+        private static void UpdateCombo(QuizSessionState state, bool isCorrect)
+        {
+            if (isCorrect)
+            {
+                state.ComboCount++;
+                state.CorrectCount++;
+                if (state.ComboCount > state.MaxCombo)
+                {
+                    state.MaxCombo = state.ComboCount;
+                }
+            }
+            else
+            {
+                state.ComboCount = 0;
+            }
         }
 
         public QuizSessionState? GetState(ISession session)
@@ -192,8 +196,8 @@ namespace ChimQuiz.Services
         {
             (int maxZ, int nameToSymbolCount, int symbolToNameCount, int symbolTypedCount) = GetDifficulty(playerXp);
 
-            HashSet<int> usedIds = new HashSet<int>();
-            List<QuizQuestionState> questions = new List<QuizQuestionState>(TotalQuestions);
+            HashSet<int> usedIds = [];
+            List<QuizQuestionState> questions = new(TotalQuestions);
 
             // Name → Symbol (MCQ) — confusable distractors
             for (int i = 0; i < nameToSymbolCount; i++)
@@ -201,7 +205,7 @@ namespace ChimQuiz.Services
                 Element el = elementService.GetWeightedRandom(usedIds, maxZ);
                 _ = usedIds.Add(el.AtomicNumber);
                 List<string> wrong = elementService.GetConfusableSymbols(3, el.Symbol, maxZ);
-                List<string> choices = new List<string>(wrong) { el.Symbol };
+                List<string> choices = new(wrong) { el.Symbol };
                 Shuffle(choices);
                 questions.Add(new QuizQuestionState
                 {
@@ -223,7 +227,7 @@ namespace ChimQuiz.Services
                 Element el = elementService.GetWeightedRandom(usedIds, maxZ);
                 _ = usedIds.Add(el.AtomicNumber);
                 List<string> wrong = elementService.GetConfusableNames(3, el.Name, maxZ);
-                List<string> choices = new List<string>(wrong) { el.Name };
+                List<string> choices = new(wrong) { el.Name };
                 Shuffle(choices);
                 questions.Add(new QuizQuestionState
                 {
@@ -298,7 +302,7 @@ namespace ChimQuiz.Services
             }
 
             string normalized = s.Normalize(NormalizationForm.FormD);
-            StringBuilder sb = new StringBuilder(normalized.Length);
+            StringBuilder sb = new(normalized.Length);
             foreach (char c in normalized)
             {
                 if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
