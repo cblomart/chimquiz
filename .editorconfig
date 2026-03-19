@@ -1,0 +1,41 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# ── Roslyn NetAnalyzers severity ──────────────────────────────────────────────
+# Treat all CA rules as warnings by default (build fails on warnings in CI)
+dotnet_analyzer_diagnostic.severity = warning
+
+# Downgrade noisy/stylistic rules to suggestion (won't fail CI)
+dotnet_diagnostic.CA1062.severity = suggestion   # Validate arguments of public methods
+dotnet_diagnostic.CA1031.severity = suggestion   # Do not catch general exception types
+dotnet_diagnostic.CA1054.severity = suggestion   # URI parameters should not be strings
+dotnet_diagnostic.CA1822.severity = suggestion   # Mark members as static
+dotnet_diagnostic.CA2007.severity = none          # ConfigureAwait (web apps don't need it)
+
+# ── SecurityCodeScan ──────────────────────────────────────────────────────────
+dotnet_diagnostic.SCS0005.severity = error        # Weak random (use cryptographic RNG)
+dotnet_diagnostic.SCS0006.severity = error        # Weak hash (MD5/SHA1)
+dotnet_diagnostic.SCS0015.severity = error        # Hardcoded password
+dotnet_diagnostic.SCS0018.severity = error        # Path traversal
+dotnet_diagnostic.SCS0026.severity = error        # LDAP injection
+dotnet_diagnostic.SCS0027.severity = error        # Open redirect
+dotnet_diagnostic.SCS0028.severity = error        # Insecure deserialization
+dotnet_diagnostic.SCS0029.severity = error        # XSS
+dotnet_diagnostic.SCS0031.severity = error        # SQL injection via command text
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.js]
+indent_style = space
+indent_size = 4

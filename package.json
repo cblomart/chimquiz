@@ -1,0 +1,11 @@
+{
+  "name": "chimquiz",
+  "private": true,
+  "scripts": {
+    "lint": "eslint ChimQuiz/wwwroot/js/"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "eslint-plugin-security": "^3.0.0"
+  }
+}
