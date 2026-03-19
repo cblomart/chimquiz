@@ -28,6 +28,8 @@ dotnet_diagnostic.IDE0305.severity = none         # Collection expression — SD
 dotnet_diagnostic.IDE0306.severity = none         # Collection expression — SDK version dependent
 dotnet_diagnostic.IDE0052.severity = none         # Unused assigned member — already cleaned up
 dotnet_diagnostic.IDE0046.severity = none         # Use conditional expression — readability preference
+dotnet_diagnostic.IDE0040.severity = none         # Accessibility modifiers — top-level statement classes
+dotnet_diagnostic.IDE0058.severity = none         # Expression value unused — ExecuteNonQuery return ignored
 
 # ── SecurityCodeScan ──────────────────────────────────────────────────────────
 dotnet_diagnostic.SCS0005.severity = suggestion    # Weak random — game logic only, not cryptographic
