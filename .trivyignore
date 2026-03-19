@@ -1,2 +1,8 @@
 # Ignore build output directories (not in repo, only present locally)
 # These are covered by .gitignore but trivy scans the filesystem
+
+# AZU-0012: Azure Files storage account without network deny rule.
+# Container Apps without VNet integration requires public endpoint access.
+# Access is secured by the storage account key (not publicly guessable).
+# Proper fix requires VNet integration which adds cost/complexity.
+AZU-0012
