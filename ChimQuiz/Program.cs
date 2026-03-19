@@ -1,8 +1,6 @@
-using System.Data.Common;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using ChimQuiz.Api;
 using ChimQuiz.Data;
 using ChimQuiz.Middleware;
@@ -31,10 +29,20 @@ builder.Services.AddSession(options =>
 });
 
 // ── EF Core / SQLite ─────────────────────────────────────────────────────────
+// Azure Files SMB doesn't support POSIX byte-range locks used by SQLite.
+// A single persistent connection with journal_mode=MEMORY + locking_mode=EXCLUSIVE
+// avoids lock files and uses whole-file locking, which SMB handles correctly.
+// All DbContext instances share this one connection to prevent lock conflicts.
 string dbPath = builder.Configuration["DatabasePath"] ?? "chimquiz.db";
+SqliteConnection sqliteConnection = new($"Data Source={dbPath}");
+sqliteConnection.Open();
+using (SqliteCommand pragmaCmd = sqliteConnection.CreateCommand())
+{
+    pragmaCmd.CommandText = "PRAGMA journal_mode=MEMORY; PRAGMA locking_mode=EXCLUSIVE;";
+    _ = pragmaCmd.ExecuteNonQuery();
+}
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}")
-           .AddInterceptors(new SqlitePragmaInterceptor()));
+    options.UseSqlite(sqliteConnection));
 
 // ── Application Services ─────────────────────────────────────────────────────
 builder.Services.AddSingleton<ElementService>();
@@ -102,30 +110,3 @@ using (IServiceScope scope = app.Services.CreateScope())
 }
 
 app.Run();
-
-// ── SQLite pragma interceptor (SMB/Azure Files compatibility) ─────────────────
-// Azure Files SMB doesn't support POSIX byte-range locks used by SQLite.
-// Setting journal_mode=MEMORY + locking_mode=EXCLUSIVE on every connection
-// avoids lock files and uses whole-file locking, which SMB handles correctly.
-sealed class SqlitePragmaInterceptor : DbConnectionInterceptor
-{
-    public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
-    {
-        if (connection is SqliteConnection sqlite)
-        {
-            using SqliteCommand cmd = sqlite.CreateCommand();
-            cmd.CommandText = "PRAGMA journal_mode=MEMORY; PRAGMA locking_mode=EXCLUSIVE;";
-            cmd.ExecuteNonQuery();
-        }
-    }
-
-    public override async Task ConnectionOpenedAsync(DbConnection connection, ConnectionEndEventData eventData, CancellationToken ct = default)
-    {
-        if (connection is SqliteConnection sqlite)
-        {
-            using SqliteCommand cmd = sqlite.CreateCommand();
-            cmd.CommandText = "PRAGMA journal_mode=MEMORY; PRAGMA locking_mode=EXCLUSIVE;";
-            await cmd.ExecuteNonQueryAsync(ct);
-        }
-    }
-}
