@@ -11,8 +11,11 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  publish:
+    name: Publish to ghcr.io
     runs-on: ubuntu-latest
+    # Only publish after code quality and security checks pass
+    needs: [build, scan]
     permissions:
       contents: read
       packages: write
@@ -50,3 +53,78 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # ── Jobs from ci.yml re-referenced so docker.yml can depend on them ───────
+  # (needs: references must resolve within the same workflow file in GHA,
+  #  so we inline the job names from ci.yml using workflow_call — simplest
+  #  alternative: merge everything into one file)
+  build:
+    name: Build & Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build — warnings as errors
+        run: dotnet build --no-restore -warnaserror
+
+      - name: Check for vulnerable NuGet packages
+        run: |
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln.txt
+          if grep -q "has the following vulnerable packages" vuln.txt; then
+            echo "❌ Vulnerable NuGet packages detected!"
+            exit 1
+          fi
+          echo "✅ No vulnerable NuGet packages"
+
+  scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy — filesystem scan (secrets + Dockerfile misconfigs)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: secret,misconfig
+          format: table
+          exit-code: '1'
+          severity: HIGH,CRITICAL
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for scanning (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: chimquiz:scan
+          load: true
+
+      - name: Trivy — Docker image scan (OS + app vulnerabilities)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: chimquiz:scan
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+
+      - name: Upload Trivy report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-results.txt
+          retention-days: 30
