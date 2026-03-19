@@ -81,5 +81,5 @@ public static class QuizEndpoints
         return Results.Ok(result);
     }
 
-    private record AnswerRequest(string Answer);
+    private sealed record AnswerRequest(string Answer);
 }

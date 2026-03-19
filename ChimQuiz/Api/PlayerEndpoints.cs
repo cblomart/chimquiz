@@ -95,6 +95,6 @@ public static class PlayerEndpoints
         });
     }
 
-    private record CreatePlayerRequest(string? Pseudo);
-    private record UpdatePseudoRequest([Required][StringLength(30, MinimumLength = 3)] string Pseudo);
+    private sealed record CreatePlayerRequest(string? Pseudo);
+    private sealed record UpdatePseudoRequest([Required][StringLength(30, MinimumLength = 3)] string Pseudo);
 }

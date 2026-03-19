@@ -384,11 +384,10 @@ public static class ElementData
         ["As"] = "L'arsenic a longtemps été surnommé 'la poudre des héritiers' car il était utilisé pour empoisonner discrètement.",
         ["Br"] = "Le brome est l'un des seuls éléments non métalliques liquides à température ambiante (avec le mercure).",
         ["Kr"] = "Le krypton a inspiré le nom de 'Kryptonite', la faiblesse de Superman dans les comics!",
-        ["Xe"] = "Le xénon peut agir comme anesthésique général. C'est un gaz noble, pourtant il peut former des composés chimiques.",
+        ["Xe"] = "Le xénon peut agir comme anesthésique général et comme propulseur ionique dans les satellites. Gaz noble, il peut pourtant former des composés chimiques!",
         ["Ag"] = "L'argent a les meilleures propriétés de conduction électrique et thermique de tous les métaux.",
         ["Sn"] = "L'étain (tin en anglais) donne son nom aux boîtes de conserve (tin cans). Sa dégradation à froid est le 'mal de l'étain'.",
         ["I"]  = "L'iode est essentiel à la production des hormones thyroïdiennes. Une carence cause le goitre!",
-        ["Xe"] = "Le xénon est utilisé comme propulseur ionique dans les satellites et sondes spatiales.",
         ["Cs"] = "L'horloge atomique au césium définit la seconde depuis 1967. Elle ne dérègle pas d'une seconde en 300 millions d'ans!",
         ["Ba"] = "Le baryum en suspension dans l'eau opacifie les rayons X, permettant de visualiser le tube digestif à l'hôpital.",
         ["La"] = "Le lanthane est utilisé dans les batteries des voitures hybrides (Toyota Prius en contient 10-15kg!).",
@@ -413,7 +412,7 @@ public static class ElementData
 
     public static readonly IReadOnlyList<Element> AllElements = ParseElements();
 
-    private static IReadOnlyList<Element> ParseElements()
+    private static System.Collections.ObjectModel.ReadOnlyCollection<Element> ParseElements()
     {
         var list = new List<Element>(120);
         foreach (var line in CsvData.Split('\n', StringSplitOptions.RemoveEmptyEntries))

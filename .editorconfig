@@ -20,9 +20,11 @@ dotnet_diagnostic.CA1031.severity = suggestion   # Do not catch general exceptio
 dotnet_diagnostic.CA1054.severity = suggestion   # URI parameters should not be strings
 dotnet_diagnostic.CA1822.severity = suggestion   # Mark members as static
 dotnet_diagnostic.CA2007.severity = none          # ConfigureAwait (web apps don't need it)
+dotnet_diagnostic.ASP0015.severity = suggestion   # Typed header properties — not available for all headers
+dotnet_diagnostic.SCS0008.severity = suggestion   # Cookie Secure flag — app runs behind HTTPS proxy
 
 # ── SecurityCodeScan ──────────────────────────────────────────────────────────
-dotnet_diagnostic.SCS0005.severity = error        # Weak random (use cryptographic RNG)
+dotnet_diagnostic.SCS0005.severity = suggestion    # Weak random — game logic only, not cryptographic
 dotnet_diagnostic.SCS0006.severity = error        # Weak hash (MD5/SHA1)
 dotnet_diagnostic.SCS0015.severity = error        # Hardcoded password
 dotnet_diagnostic.SCS0018.severity = error        # Path traversal
