@@ -1,0 +1,223 @@
+@page
+@model QuizModel
+@{
+    ViewData["Title"] = "Quiz";
+    ViewData["Description"] = "Quiz interactif sur les éléments chimiques du tableau périodique.";
+}
+
+<div class="quiz-page">
+    <!-- Player Info Bar -->
+    <div class="quiz-player-bar glass-card">
+        <div class="quiz-player-info">
+            <span id="quiz-pseudo" class="quiz-pseudo">Chargement...</span>
+            <span id="quiz-rank" class="quiz-rank-badge"></span>
+        </div>
+        <div class="quiz-player-stats">
+            <span class="stat-badge">🔥 Série&nbsp;<span id="quiz-streak">0</span></span>
+            <span class="stat-badge">⚡ <span id="quiz-session-xp">0</span> XP</span>
+        </div>
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="question-card" class="quiz-container">
+        <!-- Progress -->
+        <div class="quiz-progress-header">
+            <span id="question-counter" class="question-counter">Question 1 / 15</span>
+            <span id="combo-display" class="combo-display" style="display:none;"></span>
+        </div>
+        <div class="progress-bar-track">
+            <div id="progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+
+        <!-- XP Display -->
+        <div class="xp-bar-container">
+            <span id="xp-display" class="xp-display">0 XP</span>
+            <span id="combo-multiplier" class="combo-multiplier">x1</span>
+        </div>
+
+        <!-- Question Timer -->
+        <div id="question-timer-area" class="question-timer-area">
+            <div id="question-timer-bar" class="question-timer-bar">
+                <div id="question-timer-fill" class="question-timer-fill"></div>
+            </div>
+            <span id="question-timer-count" class="question-timer-count">15</span>
+        </div>
+
+        <!-- Question -->
+        <div class="question-area">
+            <p id="question-prompt" class="question-prompt">Chargement de la question...</p>
+            <div id="question-display" class="question-display-value">
+                <span id="display-value" class="display-value">...</span>
+            </div>
+        </div>
+
+        <!-- Choices (MCQ) -->
+        <div id="choices-grid" class="choices-grid">
+            <button id="choice-0" class="choice-btn" onclick="selectAnswer(this.dataset.value)" data-value="">
+                <span class="choice-letter">A</span>
+                <span class="choice-text"></span>
+            </button>
+            <button id="choice-1" class="choice-btn" onclick="selectAnswer(this.dataset.value)" data-value="">
+                <span class="choice-letter">B</span>
+                <span class="choice-text"></span>
+            </button>
+            <button id="choice-2" class="choice-btn" onclick="selectAnswer(this.dataset.value)" data-value="">
+                <span class="choice-letter">C</span>
+                <span class="choice-text"></span>
+            </button>
+            <button id="choice-3" class="choice-btn" onclick="selectAnswer(this.dataset.value)" data-value="">
+                <span class="choice-letter">D</span>
+                <span class="choice-text"></span>
+            </button>
+        </div>
+
+        <!-- Typed Input (saisie libre) -->
+        <div id="typed-input-area" class="typed-input-area" style="display:none;">
+            <div class="typed-input-wrapper">
+                <input
+                    type="text"
+                    id="typed-answer"
+                    class="typed-answer-input"
+                    placeholder="Écris le nom de l'élément..."
+                    maxlength="50"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                />
+                <button id="submit-typed" class="btn btn-primary typed-submit-btn" onclick="submitTypedAnswer()">
+                    Valider →
+                </button>
+            </div>
+            <p class="typed-hint">💡 Astuce : les accents ne sont pas obligatoires (ex: Helium = Hélium)</p>
+        </div>
+
+        <!-- Element Info Card — overlays question area after every answer -->
+        <div id="element-info-card" class="element-info-card" style="display:none;" aria-live="polite">
+            <!-- Verdict badge -->
+            <div id="answer-verdict" class="answer-verdict"></div>
+
+            <!-- Spelling correction — shown only on fuzzy match -->
+            <div id="spelling-correction" class="spelling-correction" style="display:none;">
+                <div class="spelling-row">
+                    <span class="spelling-label">Tu as écrit</span>
+                    <span id="spelling-given" class="spelling-given"></span>
+                </div>
+                <div class="spelling-row">
+                    <span class="spelling-label">Orthographe correcte</span>
+                    <span id="spelling-correct" class="spelling-correct"></span>
+                </div>
+            </div>
+
+            <!-- Element identity -->
+            <div class="info-element-header">
+                <div class="info-symbol-badge">
+                    <span id="info-symbol" class="info-symbol-large"></span>
+                    <span id="info-atomic-number" class="info-atomic-number"></span>
+                </div>
+                <div class="info-element-meta">
+                    <div id="info-name" class="info-element-name"></div>
+                </div>
+            </div>
+
+            <!-- Fun fact — HERO (most important, shown first) -->
+            <div id="info-fact-block" class="info-fact-block" style="display:none;">
+                <div class="info-fact-title">🤯 Le saviez-vous ?</div>
+                <p id="info-fact-text" class="info-fact-text"></p>
+            </div>
+
+            <!-- Compact info rows -->
+            <div class="info-rows">
+                <div class="info-row" id="info-use-row">
+                    <span class="info-row-icon">💡</span>
+                    <div class="info-row-content">
+                        <span class="info-row-label">Utilisation</span>
+                        <span id="info-use-text" class="info-row-text"></span>
+                    </div>
+                </div>
+                <div class="info-row" id="info-where-row">
+                    <span class="info-row-icon">🌍</span>
+                    <div class="info-row-content">
+                        <span class="info-row-label">Où le trouver</span>
+                        <span id="info-where-text" class="info-row-text"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer: timer + next button -->
+            <div class="info-card-footer">
+                <div id="info-timer-bar" class="info-timer-bar">
+                    <div id="info-timer-fill" class="info-timer-fill"></div>
+                </div>
+                <button class="btn btn-primary info-next-btn" onclick="nextQuestion()">
+                    <span id="info-next-label">J'ai lu !</span>
+                    <span id="info-timer-label" class="timer-label">12s</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating XP container -->
+    <div id="xp-float-container" class="xp-float-container" aria-hidden="true"></div>
+</div>
+
+<!-- Idle Modal -->
+<div id="idle-modal" class="idle-overlay" style="display:none;" aria-modal="true" role="dialog">
+    <div class="idle-card glass-card">
+        <div class="idle-emoji">😴</div>
+        <h2 class="idle-title">Tu es encore là ?</h2>
+        <p class="idle-subtitle">Ta partie t'attend...</p>
+        <div class="idle-actions">
+            <button class="btn btn-primary" onclick="dismissIdle()">⚡ Oui, je continue !</button>
+            <a href="/" class="btn btn-secondary">Abandonner</a>
+        </div>
+    </div>
+</div>
+
+<!-- Game Over Overlay -->
+<div id="game-over" class="game-over-overlay" style="display:none;" aria-modal="true" role="dialog">
+    <div class="game-over-card glass-card">
+        <div class="game-over-header">
+            <div class="game-over-emoji" id="game-over-emoji">🏆</div>
+            <h2 class="game-over-title">Partie terminée !</h2>
+        </div>
+
+        <div class="game-over-stats">
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-correct">0/15</div>
+                <div class="result-stat-label">Bonnes réponses</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-xp">0</div>
+                <div class="result-stat-label">XP gagnés</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-combo">0</div>
+                <div class="result-stat-label">Meilleur combo</div>
+            </div>
+        </div>
+
+        <!-- Rank info -->
+        <div class="rank-summary glass-card" id="rank-summary">
+            <div id="rank-display" class="rank-display"></div>
+            <div class="xp-progress-bar-container">
+                <div class="xp-progress-labels">
+                    <span id="rank-current-label" class="xp-label"></span>
+                    <span id="rank-next-label" class="xp-label"></span>
+                </div>
+                <div class="xp-progress-track">
+                    <div id="rank-progress-fill" class="xp-progress-fill" style="width:0%"></div>
+                </div>
+                <div id="rank-name-display" class="rank-name-display"></div>
+            </div>
+        </div>
+
+        <div class="game-over-actions">
+            <button id="replay-btn" class="btn btn-primary" onclick="replayGame()">
+                🔄 Rejouer
+            </button>
+            <a href="/leaderboard" class="btn btn-secondary">
+                🏆 Voir le classement
+            </a>
+        </div>
+    </div>
+</div>

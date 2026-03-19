@@ -1,0 +1,105 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IConfiguration Configuration
+@{
+    var siteUrl = Configuration["SiteUrl"] ?? "https://chimquiz.fr";
+    var pageTitle = ViewData["Title"]?.ToString() ?? "ChimQuiz";
+    var description = ViewData["Description"]?.ToString() ?? "Quiz interactif sur le tableau périodique des éléments. Apprends la chimie en t'amusant!";
+    var canonicalUrl = $"{siteUrl}{Context.Request.Path}";
+    var csrfToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO -->
+    <title>@pageTitle - ChimQuiz</title>
+    <meta name="description" content="@description" />
+    <meta name="keywords" content="chimie, tableau périodique, éléments chimiques, quiz, lycée, apprendre, symboles chimiques" />
+    <meta name="author" content="ChimQuiz" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="@canonicalUrl" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="@pageTitle - ChimQuiz" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@canonicalUrl" />
+    <meta property="og:image" content="@siteUrl/img/og-preview.png" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="ChimQuiz" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@pageTitle - ChimQuiz" />
+    <meta name="twitter:description" content="@description" />
+    <meta name="twitter:image" content="@siteUrl/img/og-preview.png" />
+
+    <!-- JSON-LD WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "WebApplication",
+      "name": "ChimQuiz",
+      "url": "@siteUrl",
+      "description": "Quiz interactif de chimie sur le tableau périodique des éléments, conçu pour les lycéens français.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "inLanguage": "fr",
+      "audience": {
+        "@@type": "EducationalAudience",
+        "educationalRole": "student",
+        "typicalAgeRange": "13-17"
+      }
+    }
+    </script>
+
+    <!-- Antiforgery -->
+    <meta name="__RequestVerificationToken" content="@csrfToken" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span class="logo-atom">⚛️</span>
+                <span class="logo-text">ChimQuiz</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Jouer</a>
+                <a href="/leaderboard" class="nav-link">Classement</a>
+                <span id="player-nav-info" class="nav-player-info"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>© 2024 ChimQuiz · Apprends la chimie en t'amusant</p>
+            <div class="footer-links">
+                <a href="/" class="footer-link">Accueil</a>
+                <a href="/leaderboard" class="footer-link">Classement</a>
+                <a href="/quiz" class="footer-link">Jouer</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App JS -->
+    <script src="~/js/quiz.js" defer></script>
+</body>
+</html>

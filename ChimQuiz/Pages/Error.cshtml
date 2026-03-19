@@ -1,0 +1,22 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Erreur";
+}
+
+<div class="error-page">
+    <div class="error-card glass-card">
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-title">Oops ! Une erreur s'est produite</h1>
+        @if (Model.ShowRequestId)
+        {
+            <p class="error-id">ID de requête : <code>@Model.RequestId</code></p>
+        }
+        <p class="error-message">
+            Désolé, quelque chose ne s'est pas passé comme prévu. Réessaie dans quelques instants.
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">🏠 Retour à l'accueil</a>
+        </div>
+    </div>
+</div>

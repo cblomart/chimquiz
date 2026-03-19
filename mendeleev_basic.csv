@@ -1,0 +1,119 @@
+Numéro_atomique;Symbole;Nom;Masse_atomique;Catégorie;Utilisation_courante;Où_trouver
+1;H;Hydrogène;1.008;Non-métal;Carburant de fusée, piles à combustible, engrais;Dans l'eau (H2O), dans les étoiles
+2;He;Hélium;4.0026;Gaz noble;Ballons, IRM médicaux, protection des soudures;Extrait du gaz naturel, dans les ballons
+3;Li;Lithium;6.94;Métal alcalin;Batteries smartphones et voitures électriques;Mines d'Amérique du Sud (triangle du lithium)
+4;Be;Béryllium;9.0122;Métal alcalino-terreux;Alliages pour avions et satellites;Minerai de béryl (émeraude et aigue-marine!)
+5;B;Bore;10.81;Métalloïde;Verre Pyrex, borax, écrans LCD;Sols désertiques, détergents, verre
+6;C;Carbone;12.011;Non-métal;Plastiques, combustibles, graphite (crayons), diamants;Partout: charbon, pétrole, diamant, êtres vivants
+7;N;Azote;14.007;Non-métal;Engrais agricoles, sachets de chips, azote liquide;Dans l'air (78%), engrais, protéines
+8;O;Oxygène;15.999;Non-métal;Respirateurs médicaux, soudure, moteurs;Dans l'air (21%), dans l'eau et les minéraux
+9;F;Fluor;18.998;Halogène;Dentifrice, Teflon des poêles, réfrigérants;Dentifrice, eau fluorée, minerai de fluorite
+10;Ne;Néon;20.18;Gaz noble;Enseignes lumineuses colorées, lasers;Dans l'air (traces), enseignes lumineuses
+11;Na;Sodium;22.99;Métal alcalin;Sel de cuisine, éclairage des tunnels, verre;Sel de table, eau de mer, nombreux aliments
+12;Mg;Magnésium;24.305;Métal alcalino-terreux;Pièces légères de vélo et voiture, anti-acides;Eau de mer, végétaux verts (chlorophylle!)
+13;Al;Aluminium;26.982;Métal post-transition;Canettes, papier alu, avions, cadres de vélo;Bauxite, canettes et objets quotidiens
+14;Si;Silicium;28.085;Métalloïde;Microprocesseurs, panneaux solaires, verre;Sable de plage (SiO2), quartz, granit
+15;P;Phosphore;30.974;Non-métal;Engrais, allumettes, ADN, sodas (acide phosphorique);Engrais, os et dents, ADN cellulaire
+16;S;Soufre;32.06;Non-métal;Pneus (caoutchouc), médicaments, acide sulfurique;Volcans, pyrite, pneus, oeufs pourris
+17;Cl;Chlore;35.45;Halogène;Désinfection de l'eau, PVC, produits ménagers;Sel marin, eau de piscine, PVC des tuyaux
+18;Ar;Argon;39.948;Gaz noble;Ampoules électriques, soudure TIG, conservation;Dans l'air (0.93%), ampoules électriques
+19;K;Potassium;39.098;Métal alcalin;Engrais agricoles, aliments (bananes!), médecine;Bananes, pommes de terre, engrais
+20;Ca;Calcium;40.078;Métal alcalino-terreux;Béton, lait, os et dents, mortier;Lait, fromage, béton, eau calcaire du robinet
+21;Sc;Scandium;44.956;Métal de transition;Alliages pour vélos et raquettes haut de gamme;Minerais rares en Scandinavie et Chine
+22;Ti;Titane;47.867;Métal de transition;Implants dentaires, fuselage d'avion, lunettes;Sable minéral, implants dentaires
+23;V;Vanadium;50.942;Métal de transition;Acier allié pour outils, catalyseurs chimiques;Minerai de vanadinite, acier des outils
+24;Cr;Chrome;51.996;Métal de transition;Acier inoxydable, chromage décoratif, peintures;Minerai de chromite, acier inox de ta cuisine
+25;Mn;Manganèse;54.938;Métal de transition;Acier pour rails, batteries alcalines, verre violet;Minerai de pyrolusite, batteries alcalines
+26;Fe;Fer;55.845;Métal de transition;Construction (béton armé), moteurs, sang humain;Partout: minerai de fer, charpentes, sang
+27;Co;Cobalt;58.933;Métal de transition;Batteries rechargables VE et smartphones, aimants;Minerai de cobaltite (Congo principalement)
+28;Ni;Nickel;58.693;Métal de transition;Acier inoxydable, pièces de monnaie, batteries;Pièces de 1 et 2 euros, acier inox
+29;Cu;Cuivre;63.546;Métal de transition;Fils électriques, tuyaux, circuits imprimés;Mines de cuivre (Chili), fils et tuyaux
+30;Zn;Zinc;65.38;Métal de transition;Galvanisation de l'acier, laiton, pommades;Acier galvanisé, pommades de pharmacie
+31;Ga;Gallium;69.723;Métal post-transition;LED bleues et vertes, semi-conducteurs;Sous-produit de l'aluminium, LED
+32;Ge;Germanium;72.63;Métalloïde;Fibres optiques, panneaux solaires, semi-conducteurs;Sous-produit du zinc, fibres optiques
+33;As;Arsenic;74.922;Métalloïde;Semi-conducteurs, bois traité;Minerai d'arsénopyrite, bois traité
+34;Se;Sélénium;78.971;Non-métal;Cellules photoélectriques, photocopieurs;Sous-produit de la fusion du cuivre
+35;Br;Brome;79.904;Halogène;Retardateurs de feu, médicaments, piscines;Eau de mer, plastiques ignifugés
+36;Kr;Krypton;83.798;Gaz noble;Lasers médicaux, éclairage studio photo;Dans l'air (traces), lasers médicaux
+37;Rb;Rubidium;85.468;Métal alcalin;Horloges atomiques pour GPS et 5G;Minerai de feldspath, sous-produit du lithium
+38;Sr;Strontium;87.62;Métal alcalino-terreux;Feux d'artifice rouges, matériaux dentaires;Minerai de célestine, feux d'artifice rouges
+39;Y;Yttrium;88.906;Métal de transition;Phosphore des écrans LED blancs, alliages;Minerai de gadolinite, terres rares
+40;Zr;Zirconium;91.224;Métal de transition;Couronnes dentaires, réacteurs nucléaires;Sable de zircon, couronnes dentaires
+41;Nb;Niobium;92.906;Métal de transition;Acier haute résistance pour pipelines, IRM;Minerai de coltan (Afrique centrale)
+42;Mo;Molybdène;95.95;Métal de transition;Acier allié pour outils, lubrifiants;Minerai de molybdénite, acier des vélos pro
+43;Tc;Technétium;98.0;Métal de transition;Médecine nucléaire (scintigraphie cancers);N'existe pas à l'état naturel!
+44;Ru;Ruthénium;101.07;Métal de transition;Catalyseurs automobiles, pointes de stylos;Sous-produit du nickel (Russie)
+45;Rh;Rhodium;102.91;Métal de transition;Pots catalytiques des voitures (antipollution);Avec le platine (Afrique du Sud)
+46;Pd;Palladium;106.42;Métal de transition;Pots catalytiques, bijoux or blanc;Mines d'Afrique du Sud et Russie
+47;Ag;Argent;107.87;Métal de transition;Bijoux, couverts, miroirs, antibactérien;Mines d'argent (Mexique, Pérou)
+48;Cd;Cadmium;112.41;Métal de transition;Anciennes batteries Ni-Cd, cellules solaires;Sous-produit du zinc
+49;In;Indium;114.82;Métal post-transition;Écrans tactiles (couche ITO), semi-conducteurs;Sous-produit du zinc, écrans tactiles
+50;Sn;Étain;118.71;Métal post-transition;Boîtes de conserve, soudures électroniques, bronze;Minerai de cassitérite, boîtes de conserve
+51;Sb;Antimoine;121.76;Métalloïde;Retardateurs de feu dans plastiques électroniques;Minerai de stibine, plastiques ignifugés
+52;Te;Tellure;127.6;Métalloïde;Cellules solaires CdTe, alliages;Sous-produit de la fusion du cuivre
+53;I;Iode;126.9;Halogène;Sel iodé, désinfectant (teinture d'iode), thyroïde;Sel iodé dans ta cuisine, algues marines
+54;Xe;Xénon;131.29;Gaz noble;Phares xénon des voitures, anesthésique;Dans l'air (traces), phares xénon
+55;Cs;Césium;132.91;Métal alcalin;Horloges atomiques (définissent la seconde!);Minerai de pollucite, GPS et satellites
+56;Ba;Baryum;137.33;Métal alcalino-terreux;Radio de l'intestin en médecine, verre optique;Minerai de barytine, hôpitaux
+57;La;Lanthane;138.91;Lanthanide;Batteries NiMH voitures hybrides, verres optiques;Terres rares (Chine), batteries hybrides
+58;Ce;Cérium;140.12;Lanthanide;Pots catalytiques, pierres à briquet;Terres rares (le plus abondant!), briquets
+59;Pr;Praséodyme;140.91;Lanthanide;Aimants puissants pour moteurs VE, verres de soudeur;Terres rares (Chine), aimants puissants
+60;Nd;Néodyme;144.24;Lanthanide;Aimants dans haut-parleurs, disques durs, moteurs VE;Terres rares, aimant de ton haut-parleur
+61;Pm;Prométhium;145.0;Lanthanide;Usage médical très spécialisé;N'existe pas à l'état naturel!
+62;Sm;Samarium;150.36;Lanthanide;Aimants industriels, traitement ciblé du cancer;Terres rares, équipements militaires
+63;Eu;Europium;151.96;Lanthanide;Phosphore des écrans, sécurité billets d'euro;Terres rares, phosphore des écrans
+64;Gd;Gadolinium;157.25;Lanthanide;Agent de contraste pour IRM médicaux;Terres rares, hôpitaux (IRM)
+65;Tb;Terbium;158.93;Lanthanide;Phosphore vert des écrans, sonars marins;Terres rares, phosphore vert des écrans
+66;Dy;Dysprosium;162.5;Lanthanide;Aimants des moteurs de voitures électriques;Terres rares (Chine), moteurs de VE
+67;Ho;Holmium;164.93;Lanthanide;Aimants de laboratoire, lasers médicaux;Terres rares, laboratoires de physique
+68;Er;Erbium;167.26;Lanthanide;Amplificateurs dans fibres optiques, lasers;Terres rares, câbles en fibres optiques
+69;Tm;Thulium;168.93;Lanthanide;Appareils rayons X portables, lasers médicaux;Terres rares (très rare), médical
+70;Yb;Ytterbium;173.05;Lanthanide;Lasers ultraprécis, horloges atomiques nouvelles;Terres rares, horloges atomiques
+71;Lu;Lutécium;174.97;Lanthanide;Scanner PET-scan médical, catalyseurs pétroliers;Terres rares (le plus rare!), scanners PET
+72;Hf;Hafnium;178.49;Métal de transition;Transistors des microprocesseurs modernes;Minerai de zircon, microprocesseurs
+73;Ta;Tantale;180.95;Métal de transition;Condensateurs électroniques (smartphones!);Minerai de coltan (Congo), ton téléphone
+74;W;Tungstène;183.84;Métal de transition;Filaments d'ampoule, outils de coupe industriels;Minerai de wolframite, outils de coupe
+75;Re;Rhénium;186.21;Métal de transition;Alliages pour turbines d'avion;Sous-produit du molybdène (Chili)
+76;Os;Osmium;190.23;Métal de transition;Pointes de stylos billes de luxe, instruments chirurgicaux;Minerai de platine (Afrique du Sud)
+77;Ir;Iridium;192.22;Métal de transition;Bougies d'allumage, pointes de stylos;Météorites! Minerai de platine
+78;Pt;Platine;195.08;Métal de transition;Pots catalytiques, bijoux, électrodes médicales;Mines d'Afrique du Sud (80% mondial!)
+79;Au;Or;196.97;Métal de transition;Bijoux, connecteurs électroniques, anti-cancer;Mines d'or (Chine, Australie), bijoux
+80;Hg;Mercure;200.59;Métal de transition;Thermomètres, ampoules fluorescentes;Minerai de cinabre, vieux thermomètres
+81;Tl;Thallium;204.38;Métal post-transition;Détecteurs gamma médicaux, verres IR;Sous-produit du zinc et plomb
+82;Pb;Plomb;207.2;Métal post-transition;Batteries de voiture, blindage radiologique;Minerai de galène, batteries de démarrage
+83;Bi;Bismuth;208.98;Métal post-transition;Médicaments estomac (Pepto-Bismol!), cosmétiques;Sous-produit du plomb, pharmacie
+84;Po;Polonium;209.0;Métalloïde;Source de chaleur pour sondes spatiales;Produit dans les réacteurs nucléaires
+85;At;Astate;210.0;Halogène;Recherche médicale expérimentale (cancer);Créé seulement dans les accélérateurs
+86;Rn;Radon;222.0;Gaz noble;Radiothérapie médicale (dangereux dans les maisons!);Dans certaines caves et sous-sols
+87;Fr;Francium;223.0;Métal alcalin;Recherche fondamentale uniquement;N'existe pas à l'état naturel en quantité mesurable
+88;Ra;Radium;226.0;Métal alcalino-terreux;Médecine nucléaire historique, autrefois montres;Minerais d'uranium, très rares
+89;Ac;Actinium;227.0;Actinide;Traitement du cancer de la prostate (Ac-225);Sous-produit des mines d'uranium
+90;Th;Thorium;232.04;Actinide;Combustible nucléaire 4e génération;Minerai de monazite, sables de plage
+91;Pa;Protactinium;231.04;Actinide;Recherche fondamentale uniquement;Minerais d'uranium, extrêmement rare
+92;U;Uranium;238.03;Actinide;Combustible des centrales nucléaires;Mines d'uranium (Kazakhstan, Canada)
+93;Np;Neptunium;237.0;Actinide;Piles des sondes spatiales, détecteurs neutrons;Créé dans les réacteurs nucléaires
+94;Pu;Plutonium;244.0;Actinide;Combustible nucléaire, piles des sondes spatiales;Réacteurs nucléaires, traces dans l'uranium
+95;Am;Américium;243.0;Actinide;Détecteurs de fumée domestiques!;Dans le détecteur de fumée de ta maison
+96;Cm;Curium;247.0;Actinide;Sources de chaleur spatiales, neutronographie;Réacteurs nucléaires, recherche
+97;Bk;Berkélium;247.0;Actinide;Recherche fondamentale;Créé uniquement en accélérateur de particules
+98;Cf;Californium;251.0;Actinide;Démarrage des réacteurs, détecteurs miniers;Réacteurs nucléaires de recherche
+99;Es;Einsteinium;252.0;Actinide;Recherche fondamentale (hommage à Einstein);Créé dans les essais nucléaires (1952)
+100;Fm;Fermium;257.0;Actinide;Recherche fondamentale;Accélérateur de particules
+101;Md;Mendélévium;258.0;Actinide;Recherche fondamentale (hommage à Mendeleïev);Créé uniquement en accélérateur
+102;No;Nobélium;259.0;Actinide;Recherche fondamentale (hommage à Nobel);Créé uniquement en accélérateur
+103;Lr;Lawrencium;266.0;Actinide;Recherche fondamentale (hommage à Lawrence);Créé uniquement en accélérateur
+104;Rf;Rutherfordium;267.0;Métal transactinide;Recherche fondamentale;Accélérateur de particules
+105;Db;Dubnium;268.0;Métal transactinide;Recherche fondamentale;Accélérateur de particules
+106;Sg;Seaborgium;269.0;Métal transactinide;Recherche fondamentale;Accélérateur de particules
+107;Bh;Bohrium;270.0;Métal transactinide;Recherche fondamentale;Accélérateur de particules
+108;Hs;Hassium;277.0;Métal transactinide;Recherche fondamentale;Accélérateur de particules
+109;Mt;Meitnérium;278.0;Métal transactinide;Recherche fondamentale (hommage à Lise Meitner);Accélérateur de particules
+110;Ds;Darmstadtium;281.0;Métal transactinide;Recherche fondamentale;Accélérateur de particules
+111;Rg;Roentgenium;282.0;Métal transactinide;Recherche fondamentale (hommage à Röntgen);Accélérateur de particules
+112;Cn;Copernicium;285.0;Métal transactinide;Recherche fondamentale (hommage à Copernic);Accélérateur de particules
+113;Nh;Nihonium;286.0;Métal post-transition;Recherche fondamentale (Nihon = Japon);Accélérateur de particules
+114;Fl;Flérovium;289.0;Métal post-transition;Recherche fondamentale;Accélérateur de particules
+115;Mc;Moscovium;290.0;Métal post-transition;Recherche fondamentale (hommage à Moscou);Accélérateur de particules
+116;Lv;Livermorium;293.0;Métal post-transition;Recherche fondamentale;Accélérateur de particules
+117;Ts;Tennessine;294.0;Halogène (prédit);Recherche fondamentale;Accélérateur de particules
+118;Og;Oganesson;294.0;Gaz noble (prédit);Recherche fondamentale (hommage à Oganessian);Accélérateur de particules

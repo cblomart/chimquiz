@@ -1,0 +1,55 @@
+@page
+@model LeaderboardModel
+@{
+    ViewData["Title"] = "Classement";
+    ViewData["Description"] = "Classement des meilleurs joueurs ChimQuiz. Qui est le plus fort en tableau périodique?";
+}
+
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "WebPage",
+  "name": "Classement ChimQuiz",
+  "description": "Classement des meilleurs joueurs du quiz de chimie sur le tableau périodique des éléments.",
+  "url": "https://chimquiz.fr/leaderboard"
+}
+</script>
+
+<div class="leaderboard-page">
+    <div class="leaderboard-header">
+        <h1 class="page-title gradient-text">🏆 Classement</h1>
+        <p class="page-subtitle">Les meilleurs chimistes de ChimQuiz</p>
+    </div>
+
+    <!-- Tab Switcher -->
+    <div class="tab-switcher">
+        <button id="tab-alltime" class="tab-btn tab-active" onclick="switchTab('alltime')">
+            🏆 Tous les temps
+        </button>
+        <button id="tab-weekly" class="tab-btn" onclick="switchTab('weekly')">
+            📅 Cette semaine
+        </button>
+    </div>
+
+    <!-- All Time Leaderboard -->
+    <div id="leaderboard-alltime" class="leaderboard-table-container">
+        <div class="leaderboard-loading">
+            <div class="loading-spinner"></div>
+            <span>Chargement du classement...</span>
+        </div>
+    </div>
+
+    <!-- Weekly Leaderboard -->
+    <div id="leaderboard-weekly" class="leaderboard-table-container" style="display:none;">
+        <div class="leaderboard-loading">
+            <div class="loading-spinner"></div>
+            <span>Chargement du classement...</span>
+        </div>
+    </div>
+
+    <!-- Player's position -->
+    <div id="my-position" class="my-position-card glass-card" style="display:none;">
+        <span class="my-position-label">Ta position :</span>
+        <span id="my-position-text" class="my-position-text"></span>
+    </div>
+</div>

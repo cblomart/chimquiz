@@ -1,0 +1,174 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Apprends la Chimie en Jouant";
+    ViewData["Description"] = "Teste tes connaissances sur les éléments du tableau périodique! Quiz interactif de chimie pour lycéens.";
+}
+
+<!-- JSON-LD FAQPage -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@@type": "Question",
+      "name": "Combien y a-t-il d'éléments dans le tableau périodique ?",
+      "acceptedAnswer": {
+        "@@type": "Answer",
+        "text": "Le tableau périodique actuel contient 118 éléments chimiques confirmés, du Hydrogène (H, numéro atomique 1) à l'Oganesson (Og, numéro atomique 118)."
+      }
+    },
+    {
+      "@@type": "Question",
+      "name": "Comment mémoriser les symboles chimiques des éléments ?",
+      "acceptedAnswer": {
+        "@@type": "Answer",
+        "text": "La meilleure façon est la répétition active : jouer à des quiz comme ChimQuiz permet d'apprendre les symboles par la pratique et le jeu, avec un système de combo et de progression pour motiver."
+      }
+    },
+    {
+      "@@type": "Question",
+      "name": "Pourquoi le fer a-t-il le symbole Fe ?",
+      "acceptedAnswer": {
+        "@@type": "Answer",
+        "text": "Le symbole Fe vient du latin 'Ferrum'. De nombreux éléments connus depuis l'Antiquité ont des symboles basés sur leur nom latin ou grec, comme Au (Aurum = Or), Ag (Argentum = Argent), ou Pb (Plumbum = Plomb)."
+      }
+    }
+  ]
+}
+</script>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <!-- Animated atom SVG background -->
+        <div class="atom-decoration">
+            <div class="atom-nucleus"></div>
+            <div class="atom-orbit atom-orbit-1">
+                <div class="atom-electron"></div>
+            </div>
+            <div class="atom-orbit atom-orbit-2">
+                <div class="atom-electron"></div>
+            </div>
+            <div class="atom-orbit atom-orbit-3">
+                <div class="atom-electron"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-content">
+        <div class="hero-badge">⚗️ Quiz Chimie · 118 Éléments</div>
+        <h1 class="hero-title">
+            Maîtrise le<br />
+            <span class="gradient-text">Tableau Périodique</span>
+        </h1>
+        <p class="hero-subtitle">
+            Teste tes connaissances sur les symboles et noms des éléments chimiques.
+            Grimpe dans le classement et deviens <strong>Lauréat Nobel</strong> !
+        </p>
+
+        <!-- Play Card -->
+        <div class="play-card glass-card">
+            <div class="play-card-header">
+                <span class="play-card-icon">🚀</span>
+                <span class="play-card-title">Commencer une partie</span>
+            </div>
+            <div class="play-card-body">
+                <label class="input-label" for="pseudo-input">Ton pseudo</label>
+                <input
+                    type="text"
+                    id="pseudo-input"
+                    class="pseudo-input"
+                    placeholder="Choisis un pseudo..."
+                    maxlength="30"
+                    autocomplete="off"
+                    spellcheck="false"
+                />
+                <div id="pseudo-error" class="input-error" style="display:none;"></div>
+                <p class="pseudo-hint">🔒 Ton pseudo est unique — personne ne peut te le voler.</p>
+                <button id="start-btn" class="btn btn-primary btn-large">
+                    <span class="btn-icon">⚡</span>
+                    Jouer !
+                </button>
+            </div>
+            <div class="play-card-hint">
+                10 questions · Symboles &amp; Noms · Combos &amp; XP
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-item">
+            <div class="stat-number gradient-text">118</div>
+            <div class="stat-label">Éléments</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number gradient-text">10</div>
+            <div class="stat-label">Questions/partie</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number gradient-text">6</div>
+            <div class="stat-label">Rangs à débloquer</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number gradient-text">x3</div>
+            <div class="stat-label">Bonus combo max</div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <h2 class="section-title">Pourquoi ChimQuiz ?</h2>
+    <div class="features-grid">
+        <div class="feature-card glass-card">
+            <div class="feature-icon">🔥</div>
+            <h3 class="feature-title">Système de Combo</h3>
+            <p class="feature-desc">
+                Enchaîne les bonnes réponses pour multiplier tes points XP.
+                Combo x3 = +50% XP, Combo x8 = triple les points !
+            </p>
+        </div>
+        <div class="feature-card glass-card">
+            <div class="feature-icon">🏆</div>
+            <h3 class="feature-title">Classement Mondial</h3>
+            <p class="feature-desc">
+                Compare ton score avec les autres joueurs.
+                Classement hebdomadaire et de tous les temps.
+            </p>
+        </div>
+        <div class="feature-card glass-card">
+            <div class="feature-icon">⚛️</div>
+            <h3 class="feature-title">Progression par Rang</h3>
+            <p class="feature-desc">
+                De "Apprenti Chimiste" à "Lauréat Nobel",
+                progresse et débloque de nouveaux titres.
+            </p>
+        </div>
+        <div class="feature-card glass-card">
+            <div class="feature-icon">🧪</div>
+            <h3 class="feature-title">Anecdotes Scientifiques</h3>
+            <p class="feature-desc">
+                Découvre des faits surprenants sur les éléments
+                après chaque bonne réponse !
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Ranks Section -->
+<section class="ranks-section">
+    <h2 class="section-title">Les Rangs</h2>
+    <div class="ranks-grid">
+        <div class="rank-badge rank-0">⚗️ Apprenti Chimiste <span class="rank-xp">0 XP</span></div>
+        <div class="rank-badge rank-1">🧪 Chimiste Junior <span class="rank-xp">100 XP</span></div>
+        <div class="rank-badge rank-2">🔬 Chimiste <span class="rank-xp">300 XP</span></div>
+        <div class="rank-badge rank-3">⚛️ Chimiste Expert <span class="rank-xp">700 XP</span></div>
+        <div class="rank-badge rank-4">🏆 Maître Chimiste <span class="rank-xp">1500 XP</span></div>
+        <div class="rank-badge rank-5">🥇 Lauréat Nobel <span class="rank-xp">3000 XP</span></div>
+    </div>
+</section>
