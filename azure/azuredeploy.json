@@ -1,0 +1,199 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+
+  "parameters": {
+    "appName": {
+      "type": "string",
+      "defaultValue": "chimquiz",
+      "maxLength": 32,
+      "metadata": { "description": "Prefix utilisé pour nommer toutes les ressources." }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": { "description": "Région Azure (ex: westeurope)." }
+    },
+    "containerImage": {
+      "type": "string",
+      "defaultValue": "ghcr.io/cblomart/chimquiz:latest",
+      "metadata": { "description": "Image Docker à déployer." }
+    },
+    "minReplicas": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": { "description": "0 = scale-to-zero (le moins cher), 1 = toujours actif." }
+    }
+  },
+
+  "variables": {
+    "storageAccountName": "[toLower(concat('st', take(parameters('appName'), 10), uniqueString(resourceGroup().id)))]",
+    "fileShareName": "[concat(parameters('appName'), '-data')]",
+    "envName": "[concat('env-', parameters('appName'))]",
+    "storageMountName": "[concat(parameters('appName'), '-storage')]"
+  },
+
+  "resources": [
+
+    // ── 1. Storage Account (SQLite persistence) ───────────────────────────────
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": { "name": "Standard_LRS" },
+      "kind": "StorageV2",
+      "properties": {
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "supportsHttpsTrafficOnly": true,
+        "allowSharedKeyAccess": true
+      }
+    },
+
+    // ── 2. Azure Files share (/data dans le container) ────────────────────────
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/default/{1}', variables('storageAccountName'), variables('fileShareName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "properties": {
+        "shareQuota": 1,
+        "enabledProtocols": "SMB"
+      }
+    },
+
+    // ── 3. Container Apps Environment ─────────────────────────────────────────
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('envName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "none"
+        },
+        "zoneRedundant": false
+      }
+    },
+
+    // ── 4. Lier Azure Files à l'environnement ─────────────────────────────────
+    {
+      "type": "Microsoft.App/managedEnvironments/storages",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/{1}', variables('envName'), variables('storageMountName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName'), 'default', variables('fileShareName'))]"
+      ],
+      "properties": {
+        "azureFile": {
+          "accountName": "[variables('storageAccountName')]",
+          "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-01-01').keys[0].value]",
+          "shareName": "[variables('fileShareName')]",
+          "accessMode": "ReadWrite"
+        }
+      }
+    },
+
+    // ── 5. Container App ──────────────────────────────────────────────────────
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('appName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments/storages', variables('envName'), variables('storageMountName'))]"
+      ],
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": 8080,
+            "transport": "auto",
+            "allowInsecure": false
+          }
+        },
+        "template": {
+          "scale": {
+            "minReplicas": "[parameters('minReplicas')]",
+            "maxReplicas": 2,
+            "rules": [
+              {
+                "name": "http-scaling",
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "10"
+                  }
+                }
+              }
+            ]
+          },
+          "volumes": [
+            {
+              "name": "chimquiz-data",
+              "storageType": "AzureFile",
+              "storageName": "[variables('storageMountName')]"
+            }
+          ],
+          "containers": [
+            {
+              "name": "[parameters('appName')]",
+              "image": "[parameters('containerImage')]",
+              "resources": {
+                "cpu": 0.25,
+                "memory": "0.5Gi"
+              },
+              "env": [
+                {
+                  "name": "ASPNETCORE_ENVIRONMENT",
+                  "value": "Production"
+                },
+                {
+                  "name": "DatabasePath",
+                  "value": "/data/chimquiz.db"
+                }
+              ],
+              "volumeMounts": [
+                {
+                  "volumeName": "chimquiz-data",
+                  "mountPath": "/data"
+                }
+              ],
+              "probes": [
+                {
+                  "type": "Liveness",
+                  "httpGet": {
+                    "path": "/",
+                    "port": 8080
+                  },
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 30
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+
+  ],
+
+  "outputs": {
+    "appFqdn": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('appName'))).configuration.ingress.fqdn]"
+    },
+    "appUrl": {
+      "type": "string",
+      "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', parameters('appName'))).configuration.ingress.fqdn)]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[variables('storageAccountName')]"
+    }
+  }
+}
