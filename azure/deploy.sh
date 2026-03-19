@@ -53,16 +53,21 @@ deploy_resource_group() {
 # ── 2. ARM template (storage + env + container app) ───────────────────────────
 deploy_infrastructure() {
   info "Déploiement ARM (storage + Container Apps)..."
-  OUTPUTS=$(az deployment group create \
+
+  # Lance le déploiement sans --query pour éviter "content already consumed"
+  az deployment group create \
     --name "$DEPLOYMENT_NAME" \
     --resource-group "$RESOURCE_GROUP" \
     --template-file "$TEMPLATE_DIR/azuredeploy.json" \
     --parameters "@$TEMPLATE_DIR/azuredeploy.parameters.json" \
-    --query "properties.outputs" \
-    --output json)
+    --output none
 
-  APP_FQDN=$(echo "$OUTPUTS" | az config get --query "appFqdn.value" 2>/dev/null \
-    || echo "$OUTPUTS" | python3 -c "import sys,json; print(json.load(sys.stdin)['appFqdn']['value'])")
+  # Lit les outputs séparément une fois le déploiement terminé
+  APP_FQDN=$(az deployment group show \
+    --name "$DEPLOYMENT_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --query "properties.outputs.appFqdn.value" \
+    --output tsv)
   APP_URL="https://$APP_FQDN"
 
   success "Déploiement terminé"
