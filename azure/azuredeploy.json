@@ -42,7 +42,11 @@
         "minimumTlsVersion": "TLS1_2",
         "allowBlobPublicAccess": false,
         "supportsHttpsTrafficOnly": true,
-        "allowSharedKeyAccess": true
+        "allowSharedKeyAccess": true,
+        "networkAcls": {
+          "defaultAction": "Deny",
+          "bypass": "AzureServices"
+        }
       }
     },
     {
