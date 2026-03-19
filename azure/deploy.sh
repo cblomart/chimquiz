@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# ChimQuiz — Déploiement Azure Container Apps
+# ChimQuiz — Déploiement Azure Container Apps + Cosmos DB
 #
 # Usage:
 #   ./deploy.sh                      # déploiement complet (infra + domaine)
@@ -17,7 +17,7 @@ set -euo pipefail
 # ── Configuration ─────────────────────────────────────────────────────────────
 RESOURCE_GROUP="rg-chimquiz"
 LOCATION="westeurope"
-CUSTOM_DOMAIN="chimquiz.blom.art"
+CUSTOM_DOMAIN="chimquiz.bl0m.art"
 APP_NAME="chimquiz"
 TEMPLATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOYMENT_NAME="chimquiz-$(date +%Y%m%d%H%M%S)"
@@ -50,11 +50,10 @@ deploy_resource_group() {
   success "Resource group prêt"
 }
 
-# ── 2. ARM template (storage + env + container app) ───────────────────────────
+# ── 2. ARM template (Cosmos DB + Container Apps) ──────────────────────────────
 deploy_infrastructure() {
-  info "Déploiement ARM (storage + Container Apps)..."
+  info "Déploiement ARM (Cosmos DB + Container Apps)..."
 
-  # --no-wait évite le bug "content already consumed" sur les longues réponses
   az deployment group create \
     --name "$DEPLOYMENT_NAME" \
     --resource-group "$RESOURCE_GROUP" \
@@ -63,7 +62,6 @@ deploy_infrastructure() {
     --no-wait \
     --output none
 
-  # Surveille l'état du déploiement
   info "Déploiement en cours (peut prendre 3-5 min)..."
   while true; do
     STATUS=$(az deployment group show \
@@ -79,7 +77,6 @@ deploy_infrastructure() {
   done
   echo ""
 
-  # Lit les outputs une fois le déploiement terminé
   APP_FQDN=$(az deployment group show \
     --name "$DEPLOYMENT_NAME" \
     --resource-group "$RESOURCE_GROUP" \
@@ -87,15 +84,21 @@ deploy_infrastructure() {
     --output tsv)
   APP_URL="https://$APP_FQDN"
 
+  COSMOS_ENDPOINT=$(az deployment group show \
+    --name "$DEPLOYMENT_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --query "properties.outputs.cosmosEndpoint.value" \
+    --output tsv)
+
   success "Déploiement terminé"
-  echo -e "${BOLD}  URL Azure:   $APP_URL${NC}"
+  echo -e "${BOLD}  URL Azure:      $APP_URL${NC}"
+  echo -e "${BOLD}  Cosmos DB:      $COSMOS_ENDPOINT${NC}"
 }
 
 # ── 3. Domaine personnalisé + certificat managé gratuit ───────────────────────
 bind_custom_domain() {
   info "Configuration du domaine $CUSTOM_DOMAIN..."
 
-  # Récupère le FQDN si pas déjà en mémoire
   if [[ -z "${APP_FQDN:-}" ]]; then
     APP_FQDN=$(az containerapp show \
       --name "$APP_NAME" \
@@ -108,15 +111,15 @@ bind_custom_domain() {
   echo -e "${BOLD}┌─────────────────────────────────────────────────────┐${NC}"
   echo -e "${BOLD}│          Configuration DNS requise                  │${NC}"
   echo -e "${BOLD}├─────────────────────────────────────────────────────┤${NC}"
-  echo -e "${BOLD}│  Ajoute ce CNAME dans ton DNS blom.art :            │${NC}"
+  echo -e "${BOLD}│  Ajoute ces enregistrements dans ton DNS bl0m.art : │${NC}"
   echo -e "${BOLD}│                                                     │${NC}"
   printf  "${BOLD}│  %-10s  CNAME  %-32s│${NC}\n" "chimquiz" "$APP_FQDN"
+  echo -e "${BOLD}│  asuid.chimquiz  TXT    <valeur de validation>      │${NC}"
   echo -e "${BOLD}│                                                     │${NC}"
   echo -e "${BOLD}│  Attends la propagation (1-5 min) puis confirme.   │${NC}"
   echo -e "${BOLD}└─────────────────────────────────────────────────────┘${NC}"
   echo ""
 
-  # Attente confirmation propagation DNS
   while true; do
     read -rp "$(echo -e "${YELLOW}DNS propagé ? (o/n) : ${NC}")" answer
     case "$answer" in
@@ -128,7 +131,6 @@ bind_custom_domain() {
     esac
   done
 
-  # Bind le hostname
   info "Ajout du hostname $CUSTOM_DOMAIN..."
   az containerapp hostname add \
     --name "$APP_NAME" \
@@ -136,14 +138,13 @@ bind_custom_domain() {
     --hostname "$CUSTOM_DOMAIN" \
     --output none
 
-  # Certificat managé gratuit (DigiCert, auto-renouvelé)
   info "Émission du certificat managé gratuit (peut prendre ~2 min)..."
   az containerapp hostname bind \
     --name "$APP_NAME" \
     --resource-group "$RESOURCE_GROUP" \
     --hostname "$CUSTOM_DOMAIN" \
     --validation-method CNAME \
-    --certificate-type managed \
+    --environment "env-$APP_NAME" \
     --output none
 
   success "Domaine et certificat configurés"
@@ -178,8 +179,8 @@ print_summary() {
   echo -e "  ${BOLD}App:${NC}           https://$CUSTOM_DOMAIN"
   echo -e "  ${BOLD}Resource group:${NC} $RESOURCE_GROUP"
   echo -e "  ${BOLD}Région:${NC}        $LOCATION"
+  echo -e "  ${BOLD}Base de données:${NC} Cosmos DB Serverless (~0 €/mois)"
   echo -e "  ${BOLD}Scale-to-zero:${NC} minReplicas=0 (économique)"
-  echo -e "  ${BOLD}Coût estimé:${NC}   ~0–1 €/mois (faible trafic)"
   echo ""
   echo -e "  Pour mettre à jour l'image: ${CYAN}./deploy.sh --update-image${NC}"
   echo ""

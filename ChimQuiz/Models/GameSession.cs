@@ -11,6 +11,9 @@ namespace ChimQuiz.Models
         public int XpEarned { get; set; }
         public int MaxCombo { get; set; }
         public bool IsCompleted { get; set; }
+        // Denormalized from Player at session save time (avoids cross-container JOIN in Cosmos)
+        public string Pseudo { get; set; } = string.Empty;
+        public string RankEmoji { get; set; } = string.Empty;
         public DateTime WeekStart => StartedAt.AddDays(-(int)StartedAt.DayOfWeek).Date;
     }
 }

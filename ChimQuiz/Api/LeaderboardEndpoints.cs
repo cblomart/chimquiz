@@ -1,4 +1,5 @@
 using ChimQuiz.Data;
+using ChimQuiz.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChimQuiz.Api
@@ -14,37 +15,41 @@ namespace ChimQuiz.Api
 
         private static async Task<IResult> GetAllTime(AppDbContext db)
         {
-            var scores = await db.Players
+            // Materialize first: RankEmoji/RankName are computed C# properties, not stored in Cosmos
+            List<Player> players = await db.Players
                 .OrderByDescending(p => p.BestSessionXp)
                 .Take(10)
-                .Select(p => new
-                {
-                    p.Pseudo,
-                    Score = p.BestSessionXp,
-                    p.TotalXp,
-                    p.RankEmoji,
-                    p.RankName,
-                    p.CurrentStreak
-                })
                 .ToListAsync();
+
+            var scores = players.Select(p => new
+            {
+                p.Pseudo,
+                Score = p.BestSessionXp,
+                p.TotalXp,
+                p.RankEmoji,
+                p.RankName,
+                p.CurrentStreak
+            });
             return Results.Ok(scores);
         }
 
         private static async Task<IResult> GetWeekly(AppDbContext db)
         {
             DateTime weekStart = DateTime.UtcNow.AddDays(-(int)DateTime.UtcNow.DayOfWeek).Date;
+
+            // Pseudo and RankEmoji are denormalized into GameSession — no cross-container JOIN needed
             var scores = await db.GameSessions
                 .Where(s => s.IsCompleted && s.StartedAt >= weekStart)
-                .Join(db.Players, s => s.PlayerId, p => p.Id, (s, p) => new
+                .OrderByDescending(s => s.XpEarned)
+                .Take(10)
+                .Select(s => new
                 {
-                    p.Pseudo,
-                    p.RankEmoji,
+                    s.Pseudo,
+                    s.RankEmoji,
                     Score = s.XpEarned,
                     s.CorrectAnswers,
                     s.MaxCombo
                 })
-                .OrderByDescending(x => x.Score)
-                .Take(10)
                 .ToListAsync();
             return Results.Ok(scores);
         }

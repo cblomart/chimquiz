@@ -6,55 +6,52 @@
       "type": "string",
       "defaultValue": "chimquiz",
       "maxLength": 32,
-      "metadata": { "description": "Prefix utilise pour nommer toutes les ressources." }
+      "metadata": { "description": "Prefix utilisé pour nommer toutes les ressources." }
     },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
-      "metadata": { "description": "Region Azure (ex: westeurope)." }
+      "metadata": { "description": "Région Azure (ex: westeurope)." }
     },
     "containerImage": {
       "type": "string",
       "defaultValue": "ghcr.io/cblomart/chimquiz:latest",
-      "metadata": { "description": "Image Docker a deployer." }
+      "metadata": { "description": "Image Docker à déployer." }
     },
     "minReplicas": {
       "type": "int",
       "defaultValue": 0,
       "metadata": { "description": "0 = scale-to-zero (le moins cher), 1 = toujours actif." }
+    },
+    "cosmosFreeTier": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": { "description": "Activer le free tier Cosmos DB (1 seul par abonnement)." }
     }
   },
   "variables": {
-    "storageAccountName": "[toLower(concat('st', take(parameters('appName'), 10), uniqueString(resourceGroup().id)))]",
-    "fileShareName": "[concat(parameters('appName'), '-data')]",
-    "envName": "[concat('env-', parameters('appName'))]",
-    "storageMountName": "[concat(parameters('appName'), '-storage')]"
+    "cosmosAccountName": "[toLower(concat('cosmos-', take(parameters('appName'), 10), '-', take(uniqueString(resourceGroup().id), 8)))]",
+    "envName": "[concat('env-', parameters('appName'))]"
   },
   "resources": [
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2023-01-01",
-      "name": "[variables('storageAccountName')]",
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2023-04-15",
+      "name": "[variables('cosmosAccountName')]",
       "location": "[parameters('location')]",
-      "sku": { "name": "Standard_LRS" },
-      "kind": "StorageV2",
+      "kind": "GlobalDocumentDB",
       "properties": {
-        "minimumTlsVersion": "TLS1_2",
-        "allowBlobPublicAccess": false,
-        "supportsHttpsTrafficOnly": true,
-        "allowSharedKeyAccess": true
-      }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-      "apiVersion": "2023-01-01",
-      "name": "[format('{0}/default/{1}', variables('storageAccountName'), variables('fileShareName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
-      ],
-      "properties": {
-        "shareQuota": 1,
-        "enabledProtocols": "SMB"
+        "databaseAccountOfferType": "Standard",
+        "enableFreeTier": "[parameters('cosmosFreeTier')]",
+        "capabilities": [{ "name": "EnableServerless" }],
+        "locations": [
+          {
+            "locationName": "[parameters('location')]",
+            "failoverPriority": 0
+          }
+        ],
+        "consistencyPolicy": { "defaultConsistencyLevel": "Session" },
+        "enableAutomaticFailover": false
       }
     },
     {
@@ -67,33 +64,23 @@
       }
     },
     {
-      "type": "Microsoft.App/managedEnvironments/storages",
-      "apiVersion": "2023-05-01",
-      "name": "[format('{0}/{1}', variables('envName'), variables('storageMountName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName'), 'default', variables('fileShareName'))]"
-      ],
-      "properties": {
-        "azureFile": {
-          "accountName": "[variables('storageAccountName')]",
-          "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-01-01').keys[0].value]",
-          "shareName": "[variables('fileShareName')]",
-          "accessMode": "ReadWrite"
-        }
-      }
-    },
-    {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2023-05-01",
       "name": "[parameters('appName')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.App/managedEnvironments/storages', variables('envName'), variables('storageMountName'))]"
+        "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosAccountName'))]"
       ],
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
         "configuration": {
+          "secrets": [
+            {
+              "name": "cosmos-key",
+              "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosAccountName')), '2023-04-15').primaryMasterKey]"
+            }
+          ],
           "ingress": {
             "external": true,
             "targetPort": 8080,
@@ -116,13 +103,6 @@
               }
             ]
           },
-          "volumes": [
-            {
-              "name": "chimquiz-data",
-              "storageType": "AzureFile",
-              "storageName": "[variables('storageMountName')]"
-            }
-          ],
           "containers": [
             {
               "name": "[parameters('appName')]",
@@ -137,14 +117,16 @@
                   "value": "Production"
                 },
                 {
-                  "name": "DatabasePath",
-                  "value": "/data/chimquiz.db"
-                }
-              ],
-              "volumeMounts": [
+                  "name": "CosmosDb__Endpoint",
+                  "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosAccountName'))).documentEndpoint]"
+                },
                 {
-                  "volumeName": "chimquiz-data",
-                  "mountPath": "/data"
+                  "name": "CosmosDb__Key",
+                  "secretRef": "cosmos-key"
+                },
+                {
+                  "name": "CosmosDb__DatabaseName",
+                  "value": "chimquiz"
                 }
               ],
               "probes": [
@@ -173,9 +155,13 @@
       "type": "string",
       "value": "[concat('https://', reference(resourceId('Microsoft.App/containerApps', parameters('appName'))).configuration.ingress.fqdn)]"
     },
-    "storageAccountName": {
+    "cosmosAccountName": {
       "type": "string",
-      "value": "[variables('storageAccountName')]"
+      "value": "[variables('cosmosAccountName')]"
+    },
+    "cosmosEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosAccountName'))).documentEndpoint]"
     }
   }
 }

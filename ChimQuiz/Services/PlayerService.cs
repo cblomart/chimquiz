@@ -122,7 +122,7 @@ namespace ChimQuiz.Services
                 return;
             }
 
-            // Save game session record
+            // Save game session record (denormalize Pseudo/RankEmoji for Cosmos leaderboard queries)
             GameSession session = new()
             {
                 Id = state.SessionId,
@@ -133,11 +133,13 @@ namespace ChimQuiz.Services
                 CorrectAnswers = state.CorrectCount,
                 XpEarned = state.TotalXp,
                 MaxCombo = state.MaxCombo,
-                IsCompleted = true
+                IsCompleted = true,
+                Pseudo = player.Pseudo,
+                RankEmoji = player.RankEmoji
             };
 
-            // Avoid duplicate session saves (idempotent)
-            if (!await db.GameSessions.AnyAsync(s => s.Id == session.Id))
+            // Avoid duplicate session saves — filter on partition key (PlayerId) for efficiency
+            if (!await db.GameSessions.AnyAsync(s => s.PlayerId == playerId && s.Id == session.Id))
             {
                 _ = db.GameSessions.Add(session);
             }

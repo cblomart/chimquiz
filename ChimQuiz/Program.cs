@@ -1,6 +1,5 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Data.Sqlite;
 using ChimQuiz.Api;
 using ChimQuiz.Data;
 using ChimQuiz.Middleware;
@@ -28,23 +27,15 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(2);
 });
 
-// ── EF Core / SQLite ─────────────────────────────────────────────────────────
-// Azure Files SMB doesn't support POSIX fcntl advisory locks that SQLite uses
-// for every write commit. Workaround: operate on a local /tmp copy of the DB
-// (where fcntl works) and sync back to Azure Files on shutdown + periodically.
-string dbPath = builder.Configuration["DatabasePath"] ?? "chimquiz.db";
-bool useLocalCopy = OperatingSystem.IsLinux() && Path.IsPathRooted(dbPath);
-string workingDbPath = useLocalCopy ? "/tmp/chimquiz_work.db" : dbPath;
+// ── EF Core / Cosmos DB ───────────────────────────────────────────────────────
+string cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"]
+    ?? throw new InvalidOperationException("CosmosDb:Endpoint configuration is required.");
+string cosmosKey = builder.Configuration["CosmosDb:Key"]
+    ?? throw new InvalidOperationException("CosmosDb:Key configuration is required.");
+string cosmosDatabase = builder.Configuration["CosmosDb:DatabaseName"] ?? "chimquiz";
 
-if (useLocalCopy && File.Exists(dbPath))
-{
-    File.Copy(dbPath, workingDbPath, overwrite: true);
-}
-
-SqliteConnection sqliteConnection = new($"Data Source={workingDbPath}");
-sqliteConnection.Open();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(sqliteConnection));
+    options.UseCosmos(cosmosEndpoint, cosmosKey, cosmosDatabase));
 
 // ── Application Services ─────────────────────────────────────────────────────
 builder.Services.AddSingleton<ElementService>();
@@ -105,40 +96,11 @@ api.MapQuizApi();
 api.MapLeaderboardApi();
 
 // ── Database initialisation ───────────────────────────────────────────────────
+// EnsureCreated creates the Cosmos database and containers if they don't exist.
 using (IServiceScope scope = app.Services.CreateScope())
 {
     AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     _ = db.Database.EnsureCreated();
 }
 
-// ── Azure Files sync ─────────────────────────────────────────────────────────
-// Sync the working DB back to Azure Files on shutdown and every 5 minutes.
-if (useLocalCopy)
-{
-    app.Lifetime.ApplicationStopping.Register(SyncToAzureFiles);
-
-    _ = Task.Run(async () =>
-    {
-        using PeriodicTimer timer = new(TimeSpan.FromMinutes(5));
-        while (await timer.WaitForNextTickAsync())
-        {
-            SyncToAzureFiles();
-        }
-    });
-}
-
 app.Run();
-
-void SyncToAzureFiles()
-{
-    try
-    {
-        using SqliteCommand cmd = sqliteConnection.CreateCommand();
-        cmd.CommandText = $"VACUUM INTO '{dbPath}'"; // nosemgrep: csharp-sqli
-        _ = cmd.ExecuteNonQuery();
-    }
-    catch (Exception ex)
-    {
-        Console.Error.WriteLine($"[chimquiz] Azure Files sync failed: {ex.Message}");
-    }
-}

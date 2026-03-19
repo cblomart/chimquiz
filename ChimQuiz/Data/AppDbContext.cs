@@ -12,15 +12,24 @@ namespace ChimQuiz.Data
         {
             _ = modelBuilder.Entity<Player>(e =>
             {
-                _ = e.HasKey(p => p.Id);
-                _ = e.HasIndex(p => p.Pseudo).IsUnique();
-                _ = e.Property(p => p.Pseudo).HasMaxLength(30).IsRequired();
+                e.ToContainer("Players");
+                e.HasPartitionKey(p => p.Id);
+                e.HasNoDiscriminator();
+                // Computed client-side properties — not stored in Cosmos
+                e.Ignore(p => p.RankName);
+                e.Ignore(p => p.RankEmoji);
+                e.Ignore(p => p.XpForCurrentRank);
+                e.Ignore(p => p.XpForNextRank);
+                e.Ignore(p => p.RankProgressPercent);
             });
 
             _ = modelBuilder.Entity<GameSession>(e =>
             {
-                _ = e.HasKey(s => s.Id);
-                _ = e.HasOne<Player>().WithMany().HasForeignKey(s => s.PlayerId);
+                e.ToContainer("GameSessions");
+                e.HasPartitionKey(s => s.PlayerId);
+                e.HasNoDiscriminator();
+                // Computed client-side property — not stored in Cosmos
+                e.Ignore(s => s.WeekStart);
             });
         }
     }
