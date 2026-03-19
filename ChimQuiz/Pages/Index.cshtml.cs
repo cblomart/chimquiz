@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ChimQuiz.Pages;
-
-public class IndexModel : PageModel
+namespace ChimQuiz.Pages
 {
-    private readonly ILogger<IndexModel> _logger;
-    public IndexModel(ILogger<IndexModel> logger) => _logger = logger;
-    public void OnGet() { }
+    public class IndexModel(ILogger<IndexModel> logger) : PageModel
+    {
+        private readonly ILogger<IndexModel> _logger = logger;
+
+        public void OnGet() { }
+    }
 }

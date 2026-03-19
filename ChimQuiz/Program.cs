@@ -6,7 +6,7 @@ using ChimQuiz.Middleware;
 using ChimQuiz.Services;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // ── Razor Pages ──────────────────────────────────────────────────────────────
 builder.Services.AddRazorPages();
@@ -20,15 +20,15 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.Cookie.Name       = "chimquiz_session";
-    options.Cookie.HttpOnly   = true;
-    options.Cookie.SameSite   = SameSiteMode.Strict;
+    options.Cookie.Name = "chimquiz_session";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.IsEssential = true;
-    options.IdleTimeout       = TimeSpan.FromHours(2);
+    options.IdleTimeout = TimeSpan.FromHours(2);
 });
 
 // ── EF Core / SQLite ─────────────────────────────────────────────────────────
-var dbPath = builder.Configuration["DatabasePath"] ?? "chimquiz.db";
+string dbPath = builder.Configuration["DatabasePath"] ?? "chimquiz.db";
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
@@ -41,12 +41,12 @@ builder.Services.AddScoped<QuizService>();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddFixedWindowLimiter("api", limiterOptions =>
+    _ = options.AddFixedWindowLimiter("api", limiterOptions =>
     {
-        limiterOptions.PermitLimit        = 120;
-        limiterOptions.Window             = TimeSpan.FromMinutes(1);
+        limiterOptions.PermitLimit = 120;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
         limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        limiterOptions.QueueLimit         = 0;
+        limiterOptions.QueueLimit = 0;
     });
 });
 
@@ -56,18 +56,18 @@ builder.Services.AddAntiforgery(options =>
     options.HeaderName = "X-CSRF-TOKEN";
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // ── Error handling ────────────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    _ = app.UseDeveloperExceptionPage();
 }
 else
 {
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
-    app.UseHttpsRedirection();
+    _ = app.UseExceptionHandler("/Error");
+    _ = app.UseHsts();
+    _ = app.UseHttpsRedirection();
 }
 
 // ── Middleware pipeline ───────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ app.UseAntiforgery();
 app.MapRazorPages();
 
 // ── API routes ────────────────────────────────────────────────────────────────
-var api = app.MapGroup("/api")
+RouteGroupBuilder api = app.MapGroup("/api")
     .RequireRateLimiting("api")
     .DisableAntiforgery();
 
@@ -91,10 +91,10 @@ api.MapQuizApi();
 api.MapLeaderboardApi();
 
 // ── Database initialisation ───────────────────────────────────────────────────
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    _ = db.Database.EnsureCreated();
 }
 
 app.Run();

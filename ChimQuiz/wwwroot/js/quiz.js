@@ -378,43 +378,47 @@ function renderSpellingCorrection(result) {
     if (block) block.style.display = show ? 'flex' : 'none';
 }
 
-function showInfoCard(result) {
-    const card      = document.getElementById('element-info-card');
-    if (!card) return;
-
-    // Hide question UI — card takes their place
-    ['question-area', 'choices-grid', 'typed-input-area', 'question-timer-area'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.visibility = 'hidden';
-    });
-
-    // Element identity
+function setElementIdentity(result) {
     const symbol  = document.getElementById('info-symbol');
     const atomNum = document.getElementById('info-atomic-number');
     const name    = document.getElementById('info-name');
     if (symbol)  symbol.textContent  = result.elementSymbol;
     if (atomNum) atomNum.textContent = `#${currentQuestion?.elementId ?? ''}`;
     if (name)    name.textContent    = result.elementName;
+}
 
-    renderVerdict(result);
-    renderSpellingCorrection(result);
-
-    if (result.isTyped && result.isCorrect && !result.wasFuzzyMatch) {
-        animateXpGain(3, '✍️ Parfait !');
-    }
-
-    // Fun fact hero block
+function renderFunFact(result) {
     const factBlock = document.getElementById('info-fact-block');
     const factTxt   = document.getElementById('info-fact-text');
-    if (factTxt && result.funFact) {
-        factTxt.textContent = result.funFact;
-    }
+    if (factTxt && result.funFact) factTxt.textContent = result.funFact;
     if (factBlock) factBlock.style.display = result.funFact ? 'block' : 'none';
+}
 
+function renderElementDetails(result) {
     const useText = document.getElementById('info-use-text');
     const where   = document.getElementById('info-where-text');
     if (useText) useText.textContent = result.commonUse   || '';
     if (where)   where.textContent   = result.whereToFind || '';
+}
+
+function showInfoCard(result) {
+    const card = document.getElementById('element-info-card');
+    if (!card) return;
+
+    ['question-area', 'choices-grid', 'typed-input-area', 'question-timer-area'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.visibility = 'hidden';
+    });
+
+    setElementIdentity(result);
+    renderVerdict(result);
+    renderSpellingCorrection(result);
+    renderFunFact(result);
+    renderElementDetails(result);
+
+    if (result.isTyped && result.isCorrect && !result.wasFuzzyMatch) {
+        animateXpGain(3, '✍️ Parfait !');
+    }
 
     cardShownAt = Date.now();
     card.style.display = 'flex';

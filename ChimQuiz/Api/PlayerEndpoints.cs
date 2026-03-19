@@ -1,100 +1,105 @@
 using ChimQuiz.Services;
 using System.ComponentModel.DataAnnotations;
 
-namespace ChimQuiz.Api;
-
-public static class PlayerEndpoints
+namespace ChimQuiz.Api
 {
-    private const string PlayerCookieName = "chimquiz_player";
-
-    public static RouteGroupBuilder MapPlayerApi(this RouteGroupBuilder group)
+    public static class PlayerEndpoints
     {
-        group.MapGet("/player/me", GetMe);
-        group.MapPost("/player/create", CreatePlayer);
-        group.MapPatch("/player/pseudo", UpdatePseudo);
-        return group;
-    }
+        private const string PlayerCookieName = "chimquiz_player";
 
-    private static async Task<IResult> GetMe(HttpContext ctx, PlayerService playerService)
-    {
-        if (!ctx.Request.Cookies.TryGetValue(PlayerCookieName, out var idStr) ||
-            !Guid.TryParse(idStr, out var playerId))
-            return Results.NotFound();
-
-        var player = await playerService.GetPlayerAsync(playerId);
-        if (player is null) return Results.NotFound();
-
-        return Results.Ok(new
+        public static RouteGroupBuilder MapPlayerApi(this RouteGroupBuilder group)
         {
-            player.Id,
-            player.Pseudo,
-            player.TotalXp,
-            player.BestSessionXp,
-            player.CurrentStreak,
-            player.MaxStreak,
-            player.RankName,
-            player.RankEmoji,
-            player.RankProgressPercent,
-            player.XpForCurrentRank,
-            player.XpForNextRank
-        });
-    }
+            _ = group.MapGet("/player/me", GetMe);
+            _ = group.MapPost("/player/create", CreatePlayer);
+            _ = group.MapPatch("/player/pseudo", UpdatePseudo);
+            return group;
+        }
 
-    private static async Task<IResult> CreatePlayer(HttpContext ctx, PlayerService playerService, CreatePlayerRequest? req)
-    {
-        var pseudo = string.IsNullOrWhiteSpace(req?.Pseudo)
-            ? playerService.GeneratePseudo()
-            : req.Pseudo.Trim();
-
-        try
+        private static async Task<IResult> GetMe(HttpContext ctx, PlayerService playerService)
         {
-            var player = await playerService.CreatePlayerAsync(pseudo);
-            SetPlayerCookie(ctx, player.Id);
-            return Results.Ok(new
+            if (!ctx.Request.Cookies.TryGetValue(PlayerCookieName, out string? idStr) ||
+                !Guid.TryParse(idStr, out Guid playerId))
+            {
+                return Results.NotFound();
+            }
+
+            Models.Player? player = await playerService.GetPlayerAsync(playerId);
+            return player is null
+                ? Results.NotFound()
+                : Results.Ok(new
             {
                 player.Id,
                 player.Pseudo,
                 player.TotalXp,
+                player.BestSessionXp,
+                player.CurrentStreak,
+                player.MaxStreak,
                 player.RankName,
                 player.RankEmoji,
-                player.RankProgressPercent
+                player.RankProgressPercent,
+                player.XpForCurrentRank,
+                player.XpForNextRank
             });
         }
-        catch (ArgumentException ex)
+
+        private static async Task<IResult> CreatePlayer(HttpContext ctx, PlayerService playerService, CreatePlayerRequest? req)
         {
-            return Results.BadRequest(new { error = ex.Message });
+            string pseudo = string.IsNullOrWhiteSpace(req?.Pseudo)
+                ? playerService.GeneratePseudo()
+                : req.Pseudo.Trim();
+
+            try
+            {
+                Models.Player player = await playerService.CreatePlayerAsync(pseudo);
+                SetPlayerCookie(ctx, player.Id);
+                return Results.Ok(new
+                {
+                    player.Id,
+                    player.Pseudo,
+                    player.TotalXp,
+                    player.RankName,
+                    player.RankEmoji,
+                    player.RankProgressPercent
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
         }
-    }
 
-    private static async Task<IResult> UpdatePseudo(HttpContext ctx, PlayerService playerService, UpdatePseudoRequest req)
-    {
-        if (!ctx.Request.Cookies.TryGetValue(PlayerCookieName, out var idStr) ||
-            !Guid.TryParse(idStr, out var playerId))
-            return Results.Unauthorized();
-
-        try
+        private static async Task<IResult> UpdatePseudo(HttpContext ctx, PlayerService playerService, UpdatePseudoRequest req)
         {
-            var player = await playerService.UpdatePseudoAsync(playerId, req.Pseudo.Trim());
-            return Results.Ok(new { player.Pseudo });
+            if (!ctx.Request.Cookies.TryGetValue(PlayerCookieName, out string? idStr) ||
+                !Guid.TryParse(idStr, out Guid playerId))
+            {
+                return Results.Unauthorized();
+            }
+
+            try
+            {
+                Models.Player player = await playerService.UpdatePseudoAsync(playerId, req.Pseudo.Trim());
+                return Results.Ok(new { player.Pseudo });
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
         }
-        catch (ArgumentException ex)
+
+        private static void SetPlayerCookie(HttpContext ctx, Guid playerId)
         {
-            return Results.BadRequest(new { error = ex.Message });
+            ctx.Response.Cookies.Append(PlayerCookieName, playerId.ToString(), new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                IsEssential = true,
+                Path = "/"
+            });
         }
-    }
 
-    private static void SetPlayerCookie(HttpContext ctx, Guid playerId)
-    {
-        ctx.Response.Cookies.Append(PlayerCookieName, playerId.ToString(), new CookieOptions
-        {
-            HttpOnly = true,
-            SameSite = SameSiteMode.Strict,
-            Expires  = DateTimeOffset.UtcNow.AddYears(1),
-            IsEssential = true,
-            Path = "/"
-        });
+        private sealed record CreatePlayerRequest(string? Pseudo);
+        private sealed record UpdatePseudoRequest([Required][StringLength(30, MinimumLength = 3)] string Pseudo);
     }
-
-    private sealed record CreatePlayerRequest(string? Pseudo);
-    private sealed record UpdatePseudoRequest([Required][StringLength(30, MinimumLength = 3)] string Pseudo);
 }

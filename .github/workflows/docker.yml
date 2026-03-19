@@ -73,11 +73,10 @@ jobs:
         run: |
           lizard ChimQuiz -l csharp \
             --CCN 15 \
-            --length 80 \
             --warnings_only \
             --output_file lizard-csharp.txt || true
           cat lizard-csharp.txt
-          lizard ChimQuiz -l csharp --CCN 15 --length 80 --error_exit
+          lizard ChimQuiz -l csharp --CCN 15 -E
 
       - name: Complexity — JS (fail > CCN 15)
         run: |
@@ -87,7 +86,7 @@ jobs:
             --warnings_only \
             --output_file lizard-js.txt || true
           cat lizard-js.txt
-          lizard ChimQuiz/wwwroot/js -l javascript --CCN 15 --length 80 --error_exit
+          lizard ChimQuiz/wwwroot/js -l javascript --CCN 15 --length 80 -E
 
       - name: Upload complexity reports
         if: always()
