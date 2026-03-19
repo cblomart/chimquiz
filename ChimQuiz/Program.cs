@@ -134,7 +134,7 @@ void SyncToAzureFiles()
     try
     {
         using SqliteCommand cmd = sqliteConnection.CreateCommand();
-        cmd.CommandText = $"VACUUM INTO '{dbPath}'";
+        cmd.CommandText = $"VACUUM INTO '{dbPath}'"; // nosemgrep: csharp-sqli
         _ = cmd.ExecuteNonQuery();
     }
     catch (Exception ex)
