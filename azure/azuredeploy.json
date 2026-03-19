@@ -1,23 +1,22 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-
   "parameters": {
     "appName": {
       "type": "string",
       "defaultValue": "chimquiz",
       "maxLength": 32,
-      "metadata": { "description": "Prefix utilisé pour nommer toutes les ressources." }
+      "metadata": { "description": "Prefix utilise pour nommer toutes les ressources." }
     },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
-      "metadata": { "description": "Région Azure (ex: westeurope)." }
+      "metadata": { "description": "Region Azure (ex: westeurope)." }
     },
     "containerImage": {
       "type": "string",
       "defaultValue": "ghcr.io/cblomart/chimquiz:latest",
-      "metadata": { "description": "Image Docker à déployer." }
+      "metadata": { "description": "Image Docker a deployer." }
     },
     "minReplicas": {
       "type": "int",
@@ -25,17 +24,13 @@
       "metadata": { "description": "0 = scale-to-zero (le moins cher), 1 = toujours actif." }
     }
   },
-
   "variables": {
     "storageAccountName": "[toLower(concat('st', take(parameters('appName'), 10), uniqueString(resourceGroup().id)))]",
     "fileShareName": "[concat(parameters('appName'), '-data')]",
     "envName": "[concat('env-', parameters('appName'))]",
     "storageMountName": "[concat(parameters('appName'), '-storage')]"
   },
-
   "resources": [
-
-    // ── 1. Storage Account (SQLite persistence) ───────────────────────────────
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2023-01-01",
@@ -50,8 +45,6 @@
         "allowSharedKeyAccess": true
       }
     },
-
-    // ── 2. Azure Files share (/data dans le container) ────────────────────────
     {
       "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
       "apiVersion": "2023-01-01",
@@ -64,22 +57,15 @@
         "enabledProtocols": "SMB"
       }
     },
-
-    // ── 3. Container Apps Environment ─────────────────────────────────────────
     {
       "type": "Microsoft.App/managedEnvironments",
       "apiVersion": "2023-05-01",
       "name": "[variables('envName')]",
       "location": "[parameters('location')]",
       "properties": {
-        "appLogsConfiguration": {
-          "destination": "none"
-        },
         "zoneRedundant": false
       }
     },
-
-    // ── 4. Lier Azure Files à l'environnement ─────────────────────────────────
     {
       "type": "Microsoft.App/managedEnvironments/storages",
       "apiVersion": "2023-05-01",
@@ -97,8 +83,6 @@
         }
       }
     },
-
-    // ── 5. Container App ──────────────────────────────────────────────────────
     {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2023-05-01",
@@ -179,9 +163,7 @@
         }
       }
     }
-
   ],
-
   "outputs": {
     "appFqdn": {
       "type": "string",

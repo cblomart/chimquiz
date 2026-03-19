@@ -54,15 +54,32 @@ deploy_resource_group() {
 deploy_infrastructure() {
   info "Déploiement ARM (storage + Container Apps)..."
 
-  # Lance le déploiement sans --query pour éviter "content already consumed"
+  # --no-wait évite le bug "content already consumed" sur les longues réponses
   az deployment group create \
     --name "$DEPLOYMENT_NAME" \
     --resource-group "$RESOURCE_GROUP" \
     --template-file "$TEMPLATE_DIR/azuredeploy.json" \
     --parameters "@$TEMPLATE_DIR/azuredeploy.parameters.json" \
+    --no-wait \
     --output none
 
-  # Lit les outputs séparément une fois le déploiement terminé
+  # Surveille l'état du déploiement
+  info "Déploiement en cours (peut prendre 3-5 min)..."
+  while true; do
+    STATUS=$(az deployment group show \
+      --name "$DEPLOYMENT_NAME" \
+      --resource-group "$RESOURCE_GROUP" \
+      --query "properties.provisioningState" \
+      --output tsv 2>/dev/null || echo "Running")
+    case "$STATUS" in
+      Succeeded) break ;;
+      Failed|Canceled) error "Déploiement échoué (état: $STATUS). Lance: az deployment group show -n $DEPLOYMENT_NAME -g $RESOURCE_GROUP" ;;
+      *) printf "."; sleep 15 ;;
+    esac
+  done
+  echo ""
+
+  # Lit les outputs une fois le déploiement terminé
   APP_FQDN=$(az deployment group show \
     --name "$DEPLOYMENT_NAME" \
     --resource-group "$RESOURCE_GROUP" \

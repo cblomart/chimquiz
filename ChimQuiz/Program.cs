@@ -29,8 +29,10 @@ builder.Services.AddSession(options =>
 
 // ── EF Core / SQLite ─────────────────────────────────────────────────────────
 string dbPath = builder.Configuration["DatabasePath"] ?? "chimquiz.db";
+// locking_mode=EXCLUSIVE uses whole-file lock (SMB-compatible) instead of byte-range locks
+string connStr = $"Data Source={dbPath};_pragma=journal_mode(DELETE);_pragma=locking_mode(EXCLUSIVE)";
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
+    options.UseSqlite(connStr));
 
 // ── Application Services ─────────────────────────────────────────────────────
 builder.Services.AddSingleton<ElementService>();
