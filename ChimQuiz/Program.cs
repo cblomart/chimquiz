@@ -100,7 +100,7 @@ api.MapLeaderboardApi();
 using (IServiceScope scope = app.Services.CreateScope())
 {
     AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    _ = db.Database.EnsureCreated();
+    _ = await db.Database.EnsureCreatedAsync();
 }
 
 app.Run();
