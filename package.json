@@ -2,9 +2,11 @@
   "name": "chimquiz",
   "private": true,
   "scripts": {
-    "lint": "eslint ChimQuiz/wwwroot/js/"
+    "lint": "eslint ChimQuiz/wwwroot/js/",
+    "build": "esbuild ChimQuiz/wwwroot/js/quiz.js --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/js/quiz.js && esbuild ChimQuiz/wwwroot/css/app.css --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/css/app.css"
   },
   "devDependencies": {
+    "esbuild": "^0.25.0",
     "eslint": "^9.0.0",
     "eslint-plugin-security": "^3.0.0"
   }
