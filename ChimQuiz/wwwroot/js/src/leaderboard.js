@@ -68,7 +68,7 @@ function renderLeaderboard(tab, scores) {
     }).join('');
 
     const headers = isAlltime
-        ? '<th>#</th><th>Joueur</th><th>Meilleur score</th><th>Rang</th><th>Série</th>'
+        ? '<th>#</th><th>Joueur</th><th>XP total</th><th>Rang</th><th>Série</th>'
         : '<th>#</th><th>Joueur</th><th>Score</th><th>Précision</th><th>Combo</th>';
 
     container.innerHTML = `<table class="leaderboard-table glass-card"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`;

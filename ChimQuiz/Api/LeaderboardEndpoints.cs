@@ -17,14 +17,14 @@ namespace ChimQuiz.Api
         {
             // Materialize first: RankEmoji/RankName are computed C# properties, not stored in Cosmos
             List<Player> players = await db.Players
-                .OrderByDescending(p => p.BestSessionXp)
+                .OrderByDescending(p => p.TotalXp)
                 .Take(10)
                 .ToListAsync();
 
             var scores = players.Select(p => new
             {
                 p.Pseudo,
-                Score = p.BestSessionXp,
+                Score = p.TotalXp,
                 p.TotalXp,
                 p.RankEmoji,
                 p.RankName,
