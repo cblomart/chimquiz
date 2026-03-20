@@ -1,9 +1,11 @@
 {
   "name": "chimquiz",
   "private": true,
+  "type": "module",
   "scripts": {
-    "lint": "eslint ChimQuiz/wwwroot/js/",
-    "build": "esbuild ChimQuiz/wwwroot/js/quiz.js --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/js/quiz.js && esbuild ChimQuiz/wwwroot/css/app.css --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/css/app.css"
+    "lint": "eslint ChimQuiz/wwwroot/js/src/",
+    "build": "esbuild ChimQuiz/wwwroot/js/src/main.js --bundle --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/js/quiz.js && esbuild ChimQuiz/wwwroot/css/app.css --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/css/app.css",
+    "build:dev": "esbuild ChimQuiz/wwwroot/js/src/main.js --bundle --allow-overwrite --outfile=ChimQuiz/wwwroot/js/quiz.js"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

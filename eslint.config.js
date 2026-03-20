@@ -3,6 +3,7 @@ import security from "eslint-plugin-security";
 export default [
   {
     files: ["ChimQuiz/wwwroot/js/**/*.js"],
+    ignores: ["ChimQuiz/wwwroot/js/src/**/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",
@@ -18,6 +19,7 @@ export default [
         console: "readonly",
         performance: "readonly",
         requestAnimationFrame: "readonly",
+        sessionStorage: "readonly",
         URL: "readonly",
       },
     },
@@ -32,6 +34,40 @@ export default [
       "max-lines-per-function": ["warn", { max: 60, skipBlankLines: true, skipComments: true }],
 
       // ── Common bugs ───────────────────────────────────────────
+      "no-unused-vars": ["warn", { varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
+      "no-undef": "error",
+      eqeqeq: ["error", "always", { null: "ignore" }],
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error",
+    },
+  },
+  {
+    files: ["ChimQuiz/wwwroot/js/src/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        fetch: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        console: "readonly",
+        performance: "readonly",
+        requestAnimationFrame: "readonly",
+        URL: "readonly",
+        sessionStorage: "readonly",
+      },
+    },
+    plugins: { security },
+    rules: {
+      ...security.configs.recommended.rules,
+      complexity: ["error", { max: 15 }],
+      "max-depth": ["warn", 4],
+      "max-lines-per-function": ["warn", { max: 60, skipBlankLines: true, skipComments: true }],
       "no-unused-vars": ["warn", { varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
       "no-undef": "error",
       eqeqeq: ["error", "always", { null: "ignore" }],
