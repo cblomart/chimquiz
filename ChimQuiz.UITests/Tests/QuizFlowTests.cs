@@ -115,11 +115,13 @@ namespace ChimQuiz.UITests.Tests
 
         private static async Task AnswerAsync(IPage page)
         {
-            bool mcqVisible = await page.Locator("#choices-grid")
-                .EvaluateAsync<bool>("el => el.style.display !== 'none'");
+            // IsVisibleAsync checks CSS visibility + display (not just inline style)
+            bool mcqVisible = await page.Locator("#choices-grid").IsVisibleAsync();
 
             if (mcqVisible)
             {
+                // Wait for button to be stable before clicking
+                await page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 10_000 });
                 await page.ClickAsync("#choice-0");
             }
             else
