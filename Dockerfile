@@ -31,6 +31,9 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DatabasePath=/data/chimquiz.db
 
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
+
 USER chimquiz
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "ChimQuiz.dll"]

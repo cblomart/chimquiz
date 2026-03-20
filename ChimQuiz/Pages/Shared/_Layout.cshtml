@@ -2,6 +2,7 @@
 @inject IConfiguration Configuration
 @{
     var siteUrl = Configuration["SiteUrl"] ?? "https://chimquiz.fr";
+    var appVersion = Configuration["APP_VERSION"] ?? "dev";
     var pageTitle = ViewData["Title"]?.ToString() ?? "ChimQuiz";
     var description = ViewData["Description"]?.ToString() ?? "Quiz interactif sur le tableau périodique des éléments. Apprends la chimie en t'amusant!";
     var canonicalUrl = $"{siteUrl}{Context.Request.Path}";
@@ -90,7 +91,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <p>© 2024 ChimQuiz · Apprends la chimie en t'amusant</p>
+            <p>© 2026 Surestacks · ChimQuiz · Apprends la chimie en t'amusant · <span class="footer-version">@appVersion</span></p>
             <div class="footer-links">
                 <a href="/" class="footer-link">Accueil</a>
                 <a href="/leaderboard" class="footer-link">Classement</a>

@@ -100,30 +100,12 @@ namespace ChimQuiz.Services
             state.TotalXp += xpEarned;
             state.CurrentIndex++;
 
-            // Track wrong elements for the revenge round (avoid duplicates)
-            bool inRevengeRound = state.RevengeStartIndex >= 0 && state.CurrentIndex - 1 >= state.RevengeStartIndex;
-            if (!isCorrect && !inRevengeRound && !state.WrongElementIds.Contains(q.ElementId))
+            if (!isCorrect)
             {
-                state.WrongElementIds.Add(q.ElementId);
+                TrackWrongElement(state, q.ElementId);
             }
 
-            bool isGameOver = state.CurrentIndex >= state.Questions.Count;
-            bool isRevengeStart = false;
-
-            if (isGameOver && state.RevengeStartIndex < 0 && state.WrongElementIds.Count > 0)
-            {
-                // Inject revenge round instead of ending
-                List<QuizQuestionState> revengeQuestions = GenerateRevengeQuestions(state.WrongElementIds);
-                state.RevengeStartIndex = state.Questions.Count;
-                state.Questions.AddRange(revengeQuestions);
-                isGameOver = false;
-                isRevengeStart = true;
-            }
-            else if (isGameOver)
-            {
-                state.IsCompleted = true;
-            }
-
+            (bool isGameOver, bool isRevengeStart) = FinaliseRound(state);
             SaveState(session, state);
 
             Element? element = elementService.GetById(q.ElementId);
@@ -150,6 +132,35 @@ namespace ChimQuiz.Services
                 FunFact = q.FunFact,
                 ComboMessage = isCorrect ? GetComboMessage(state.ComboCount) : ""
             };
+        }
+
+        private static void TrackWrongElement(QuizSessionState state, int elementId)
+        {
+            bool inRevengeRound = state.RevengeStartIndex >= 0
+                && state.CurrentIndex - 1 >= state.RevengeStartIndex;
+            if (!inRevengeRound && !state.WrongElementIds.Contains(elementId))
+            {
+                state.WrongElementIds.Add(elementId);
+            }
+        }
+
+        private (bool isGameOver, bool isRevengeStart) FinaliseRound(QuizSessionState state)
+        {
+            if (state.CurrentIndex < state.Questions.Count)
+            {
+                return (false, false);
+            }
+
+            if (state.RevengeStartIndex < 0 && state.WrongElementIds.Count > 0)
+            {
+                List<QuizQuestionState> revengeQuestions = GenerateRevengeQuestions(state.WrongElementIds);
+                state.RevengeStartIndex = state.Questions.Count;
+                state.Questions.AddRange(revengeQuestions);
+                return (false, true);
+            }
+
+            state.IsCompleted = true;
+            return (true, false);
         }
 
         private (bool isCorrect, bool wasFuzzy) CheckAnswer(QuizQuestionState q, string answer)
