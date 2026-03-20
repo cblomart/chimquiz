@@ -514,7 +514,9 @@ async function nextQuestion() {
     if (!result) return;
 
     // If the user stayed ≥ BONUS_XP_THRESHOLD_MS, show a visual bonus XP reward
-    if (cardShownAt && Date.now() - cardShownAt >= BONUS_XP_THRESHOLD_MS) {
+    const elapsed = cardShownAt ? Date.now() - cardShownAt : 0;
+    cardShownAt = 0; // reset before any await so double-clicks don't re-trigger
+    if (elapsed >= BONUS_XP_THRESHOLD_MS) {
         animateXpGain(5, '📚 Curieux(se) !');
     }
 
