@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChimQuiz", "ChimQuiz\ChimQuiz.csproj", "{4C75F6E2-B260-755C-8AE6-393E45F5E36B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChimQuiz.Tests", "ChimQuiz.Tests\ChimQuiz.Tests.csproj", "{5930D515-51EA-4A59-BF14-C23CF59945BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{4C75F6E2-B260-755C-8AE6-393E45F5E36B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C75F6E2-B260-755C-8AE6-393E45F5E36B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C75F6E2-B260-755C-8AE6-393E45F5E36B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5930D515-51EA-4A59-BF14-C23CF59945BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5930D515-51EA-4A59-BF14-C23CF59945BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5930D515-51EA-4A59-BF14-C23CF59945BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5930D515-51EA-4A59-BF14-C23CF59945BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,6 +32,9 @@ jobs:
       - name: Format check
         run: dotnet format --verify-no-changes --no-restore
 
+      - name: Unit tests
+        run: dotnet test ChimQuiz.Tests/ --logger "console;verbosity=minimal"
+
       - name: Vulnerable NuGet packages
         run: |
           dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln.txt

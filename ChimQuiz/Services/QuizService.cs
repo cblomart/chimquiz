@@ -292,6 +292,10 @@ namespace ChimQuiz.Services
             (int maxZ, int nameToSymbolBase, int symbolToNameBase, int symbolTypedBase) = GetDifficulty(playerXp);
             int baseTotal = nameToSymbolBase + symbolToNameBase + symbolTypedBase; // always 15
 
+            // Cannot generate more unique questions than there are elements in the pool
+            int poolSize = elementService.GetAll().Count(e => e.AtomicNumber <= maxZ);
+            total = Math.Min(total, poolSize);
+
             // Scale each bucket proportionally; give remainder to typed
             int nameToSymbolCount = (int)Math.Round((double)nameToSymbolBase * total / baseTotal);
             int symbolToNameCount = (int)Math.Round((double)symbolToNameBase * total / baseTotal);
