@@ -27,15 +27,23 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(2);
 });
 
-// ── EF Core / Cosmos DB ───────────────────────────────────────────────────────
-string cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"]
-    ?? throw new InvalidOperationException("CosmosDb:Endpoint configuration is required.");
-string cosmosKey = builder.Configuration["CosmosDb:Key"]
-    ?? throw new InvalidOperationException("CosmosDb:Key configuration is required.");
-string cosmosDatabase = builder.Configuration["CosmosDb:DatabaseName"] ?? "chimquiz";
+// ── EF Core / Cosmos DB (or InMemory for UI tests) ───────────────────────────
+if (builder.Environment.IsEnvironment("UITest"))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseInMemoryDatabase("chimquiz-ui-test"));
+}
+else
+{
+    string cosmosEndpoint = builder.Configuration["CosmosDb:Endpoint"]
+        ?? throw new InvalidOperationException("CosmosDb:Endpoint configuration is required.");
+    string cosmosKey = builder.Configuration["CosmosDb:Key"]
+        ?? throw new InvalidOperationException("CosmosDb:Key configuration is required.");
+    string cosmosDatabase = builder.Configuration["CosmosDb:DatabaseName"] ?? "chimquiz";
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseCosmos(cosmosEndpoint, cosmosKey, cosmosDatabase));
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseCosmos(cosmosEndpoint, cosmosKey, cosmosDatabase));
+}
 
 // ── Application Services ─────────────────────────────────────────────────────
 builder.Services.AddSingleton<ElementService>();
@@ -104,3 +112,6 @@ using (IServiceScope scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+// Required by WebApplicationFactory<Program> in ChimQuiz.UITests
+public partial class Program { }
