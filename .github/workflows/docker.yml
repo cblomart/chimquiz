@@ -257,9 +257,10 @@ jobs:
 
       - name: Deploy new image
         run: |
-          IMAGE="ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}"
+          VERSION="${{ github.event.release.tag_name }}"
+          IMAGE="ghcr.io/${{ github.repository }}:${VERSION#v}"
           az containerapp update \
             --name chimquiz \
             --resource-group rg-chimquiz \
             --image "$IMAGE" \
-            --set-env-vars "APP_VERSION=${{ github.event.release.tag_name }}"
+            --set-env-vars "APP_VERSION=${VERSION}"
