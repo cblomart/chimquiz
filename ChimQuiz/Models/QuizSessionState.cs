@@ -31,5 +31,7 @@ namespace ChimQuiz.Models
         public int CorrectCount { get; set; }
         public DateTime StartedAt { get; set; } = DateTime.UtcNow;
         public bool IsCompleted { get; set; }
+        public List<int> WrongElementIds { get; set; } = [];
+        public int RevengeStartIndex { get; set; } = -1; // -1 = no revenge round
     }
 }

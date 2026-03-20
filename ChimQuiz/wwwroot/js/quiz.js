@@ -203,9 +203,14 @@ function renderQuestion(q) {
     const choicesGrid = document.getElementById('choices-grid');
     const typedArea   = document.getElementById('typed-input-area');
 
+    const revengeBadge = document.getElementById('revenge-badge');
+    if (revengeBadge) revengeBadge.style.display = q.isRevenge ? 'inline-block' : 'none';
+
     if (promptEl)    promptEl.textContent    = q.prompt;
     if (displayEl)   displayEl.textContent   = q.displayValue;
-    if (counterEl)   counterEl.textContent   = `Question ${q.questionNumber} / ${q.totalQuestions}`;
+    if (counterEl)   counterEl.textContent   = q.isRevenge
+        ? `Revanche ${q.questionNumber} / ${q.totalQuestions}`
+        : `Question ${q.questionNumber} / ${q.totalQuestions}`;
     if (progressBar) progressBar.style.width = `${((q.questionNumber - 1) / q.totalQuestions) * 100}%`;
     if (xpDisplay)   xpDisplay.textContent   = `${q.totalXp} XP`;
     if (multEl)      multEl.textContent      = q.comboMultiplier;
@@ -354,7 +359,11 @@ function handleAnswerResult(result, givenAnswer) {
     if (progressBar) progressBar.style.width = `${(result.questionIndex + 1) / result.totalQuestions * 100}%`;
 
     // Show element info card (always, after every answer) — replaces question in-place
-    setTimeout(() => showInfoCard(result), 400);
+    if (result.isRevengeStart) {
+        setTimeout(() => showRevengeOverlay(result), 400);
+    } else {
+        setTimeout(() => showInfoCard(result), 400);
+    }
 }
 
 // ── Element Info Card ─────────────────────────────────────────────────────────
@@ -574,6 +583,43 @@ function startQuestionTimer(seconds) {
 // Patch scheduleNextQuestion to store last result
 const _origSchedule = scheduleNextQuestion;
 window.scheduleNextQuestion = scheduleNextQuestion;
+
+// ── Revenge Round ─────────────────────────────────────────────────────────────
+
+function showRevengeOverlay(result) {
+    clearTimers();
+    hideInfoCard();
+
+    // Show the last answer info briefly first, then transition
+    showInfoCard(result);
+
+    // After info card times out, show revenge overlay
+    clearTimeout(nextQuestionTimer);
+    nextQuestionTimer = setTimeout(() => {
+        hideInfoCard();
+        const overlay    = document.getElementById('revenge-overlay');
+        const countEl    = document.getElementById('revenge-count');
+        const listEl     = document.getElementById('revenge-elements');
+        if (!overlay) return;
+
+        // Populate wrong elements list (already loaded in next question)
+        if (countEl) countEl.textContent = result.totalQuestions || '?';
+        if (listEl)  listEl.innerHTML = '';
+
+        overlay.style.display = 'flex';
+        overlay.style.animation = 'none';
+        void overlay.offsetHeight;
+        overlay.style.animation = 'fadeIn 0.4s ease forwards';
+    }, 13000); // after info card auto-advances
+}
+
+async function startRevenge() {
+    const overlay = document.getElementById('revenge-overlay');
+    if (overlay) overlay.style.display = 'none';
+    animating = false;
+    gameActive = true;
+    await loadNextQuestion();
+}
 
 // ── Game Over ─────────────────────────────────────────────────────────────────
 async function showGameOver(result) {

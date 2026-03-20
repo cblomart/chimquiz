@@ -23,6 +23,7 @@
         <!-- Progress -->
         <div class="quiz-progress-header">
             <span id="question-counter" class="question-counter">Question 1 / 15</span>
+            <span id="revenge-badge" class="revenge-badge" style="display:none;">🔥 REVANCHE</span>
             <span id="combo-display" class="combo-display" style="display:none;"></span>
         </div>
         <div class="progress-bar-track">
@@ -170,6 +171,19 @@
             <button class="btn btn-primary" onclick="dismissIdle()">⚡ Oui, je continue !</button>
             <a href="/" class="btn btn-secondary">Abandonner</a>
         </div>
+    </div>
+</div>
+
+<!-- Revenge Round Overlay -->
+<div id="revenge-overlay" class="revenge-overlay" style="display:none;" aria-modal="true" role="dialog">
+    <div class="revenge-card glass-card">
+        <div class="revenge-emoji">🔥</div>
+        <h2 class="revenge-title">Tour Revanche !</h2>
+        <p class="revenge-subtitle">Tu as raté <strong id="revenge-count">0</strong> élément(s).<br/>C'est ta chance de les maîtriser !</p>
+        <ul class="revenge-elements" id="revenge-elements"></ul>
+        <button class="btn btn-primary revenge-btn" onclick="startRevenge()">
+            ⚡ Je les bats !
+        </button>
     </div>
 </div>
 

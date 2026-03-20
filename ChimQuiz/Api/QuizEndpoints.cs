@@ -33,7 +33,7 @@ namespace ChimQuiz.Api
 
         private static IResult GetQuestion(HttpContext ctx, QuizService quizService)
         {
-            (Models.QuizQuestionState? question, int index, int total, int combo, int totalXp) = quizService.GetCurrentQuestion(ctx.Session);
+            (Models.QuizQuestionState? question, int index, int total, int combo, int totalXp, bool isRevenge) = quizService.GetCurrentQuestion(ctx.Session);
             return question is null
                 ? Results.NotFound(new { error = "Aucune session active" })
                 : Results.Ok(new
@@ -46,7 +46,8 @@ namespace ChimQuiz.Api
                     TotalQuestions = total,
                     ComboCount = combo,
                     TotalXp = totalXp,
-                    ComboMultiplier = combo switch { >= 8 => "x3", >= 5 => "x2", >= 3 => "x1.5", _ => "x1" }
+                    ComboMultiplier = combo switch { >= 8 => "x3", >= 5 => "x2", >= 3 => "x1.5", _ => "x1" },
+                    IsRevenge = isRevenge
                 });
         }
 

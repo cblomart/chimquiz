@@ -945,6 +945,68 @@ img { max-width: 100%; display: block; }
 .idle-actions .btn { width: 100%; justify-content: center; }
 
 /* ── Game Over Overlay ────────────────────────────────────────── */
+/* ── Revenge Badge ────────────────────────────────────────────────────────── */
+.revenge-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #ff6b35, #f72585);
+  color: #fff;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ── Revenge Overlay ──────────────────────────────────────────────────────── */
+.revenge-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(13, 13, 26, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.revenge-card {
+  max-width: 400px;
+  width: 100%;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  border: 1px solid rgba(247, 37, 133, 0.4);
+  box-shadow: 0 0 40px rgba(247, 37, 133, 0.2);
+}
+.revenge-emoji { font-size: 3.5rem; margin-bottom: 0.5rem; }
+.revenge-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff6b35, #f72585);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.75rem;
+}
+.revenge-subtitle { color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.6; }
+.revenge-elements {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+.revenge-elements li {
+  background: rgba(247, 37, 133, 0.15);
+  border: 1px solid rgba(247, 37, 133, 0.3);
+  border-radius: 8px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.revenge-btn { width: 100%; margin-top: 0.5rem; font-size: 1.1rem; }
+
 .game-over-overlay {
   position: fixed;
   inset: 0;

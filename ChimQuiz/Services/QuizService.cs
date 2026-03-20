@@ -19,6 +19,7 @@ namespace ChimQuiz.Services
         public bool IsGameOver { get; set; }
         public bool IsTyped { get; set; }
         public bool WasFuzzyMatch { get; set; } // accepted with 1-char typo
+        public bool IsRevengeStart { get; set; } // first question of revenge round just unlocked
         // Element info — always shown after every answer
         public string ElementSymbol { get; set; } = "";
         public string ElementName { get; set; } = "";
@@ -55,13 +56,17 @@ namespace ChimQuiz.Services
             return state;
         }
 
-        public (QuizQuestionState? question, int index, int total, int combo, int totalXp) GetCurrentQuestion(ISession session)
+        public (QuizQuestionState? question, int index, int total, int combo, int totalXp, bool isRevenge) GetCurrentQuestion(ISession session)
         {
             QuizSessionState? state = LoadState(session);
             if (state is null || state.IsCompleted || state.CurrentIndex >= state.Questions.Count)
             {
-                return (null, 0, 0, 0, 0);
+                return (null, 0, 0, 0, 0, false);
             }
+
+            bool isRevenge = state.RevengeStartIndex >= 0 && state.CurrentIndex >= state.RevengeStartIndex;
+            int displayIndex = isRevenge ? state.CurrentIndex - state.RevengeStartIndex : state.CurrentIndex;
+            int displayTotal = isRevenge ? state.Questions.Count - state.RevengeStartIndex : state.RevengeStartIndex >= 0 ? state.RevengeStartIndex : state.Questions.Count;
 
             QuizQuestionState q = state.Questions[state.CurrentIndex];
             QuizQuestionState safeQ = new()
@@ -76,7 +81,7 @@ namespace ChimQuiz.Services
                 WhereToFind = q.WhereToFind,
                 CorrectAnswer = ""   // never expose before answer
             };
-            return (safeQ, state.CurrentIndex, state.Questions.Count, state.ComboCount, state.TotalXp);
+            return (safeQ, displayIndex, displayTotal, state.ComboCount, state.TotalXp, isRevenge);
         }
 
         public AnswerResult? SubmitAnswer(ISession session, string answer)
@@ -95,8 +100,26 @@ namespace ChimQuiz.Services
             state.TotalXp += xpEarned;
             state.CurrentIndex++;
 
+            // Track wrong elements for the revenge round (avoid duplicates)
+            bool inRevengeRound = state.RevengeStartIndex >= 0 && state.CurrentIndex - 1 >= state.RevengeStartIndex;
+            if (!isCorrect && !inRevengeRound && !state.WrongElementIds.Contains(q.ElementId))
+            {
+                state.WrongElementIds.Add(q.ElementId);
+            }
+
             bool isGameOver = state.CurrentIndex >= state.Questions.Count;
-            if (isGameOver)
+            bool isRevengeStart = false;
+
+            if (isGameOver && state.RevengeStartIndex < 0 && state.WrongElementIds.Count > 0)
+            {
+                // Inject revenge round instead of ending
+                List<QuizQuestionState> revengeQuestions = GenerateRevengeQuestions(state.WrongElementIds);
+                state.RevengeStartIndex = state.Questions.Count;
+                state.Questions.AddRange(revengeQuestions);
+                isGameOver = false;
+                isRevengeStart = true;
+            }
+            else if (isGameOver)
             {
                 state.IsCompleted = true;
             }
@@ -119,6 +142,7 @@ namespace ChimQuiz.Services
                 IsGameOver = isGameOver,
                 IsTyped = q.IsTyped,
                 WasFuzzyMatch = wasFuzzy,
+                IsRevengeStart = isRevengeStart,
                 ElementSymbol = q.DisplayValue,
                 ElementName = element?.Name ?? q.CorrectAnswer,
                 CommonUse = q.CommonUse,
@@ -170,6 +194,74 @@ namespace ChimQuiz.Services
         public QuizSessionState? GetState(ISession session)
         {
             return LoadState(session);
+        }
+
+        // ── Revenge round ────────────────────────────────────────────────────────
+
+        private List<QuizQuestionState> GenerateRevengeQuestions(List<int> wrongIds)
+        {
+            // Pick up to 5 wrong elements, shuffled
+            List<int> ids = [.. wrongIds];
+            Shuffle(ids);
+            if (ids.Count > 5)
+            {
+                ids = ids[..5];
+            }
+
+            List<QuizQuestionState> questions = new(ids.Count);
+            foreach (int id in ids)
+            {
+                Element? el = elementService.GetById(id);
+                if (el is null)
+                {
+                    continue;
+                }
+
+                // Flip question type: typed → MCQ (relief), MCQ → opposite MCQ
+                QuizQuestionState q = _random.Next(2) == 0
+                    ? BuildRevengeNameToSymbol(el)
+                    : BuildRevengeSymbolToName(el);
+                questions.Add(q);
+            }
+            return questions;
+        }
+
+        private QuizQuestionState BuildRevengeNameToSymbol(Element el)
+        {
+            List<string> wrong = elementService.GetConfusableSymbols(3, el.Symbol, 118);
+            List<string> choices = new(wrong) { el.Symbol };
+            Shuffle(choices);
+            return new QuizQuestionState
+            {
+                ElementId = el.AtomicNumber,
+                Type = QuestionType.NameToSymbol,
+                CorrectAnswer = el.Symbol,
+                Choices = choices,
+                Prompt = "Quel est le symbole de cet élément ?",
+                DisplayValue = el.Name,
+                FunFact = el.FunFact,
+                CommonUse = el.CommonUse,
+                WhereToFind = el.WhereToFind
+            };
+        }
+
+        private QuizQuestionState BuildRevengeSymbolToName(Element el)
+        {
+            List<string> wrong = elementService.GetConfusableNames(3, el.Name, 118);
+            List<string> choices = new(wrong) { el.Name };
+            Shuffle(choices);
+            return new QuizQuestionState
+            {
+                ElementId = el.AtomicNumber,
+                Type = QuestionType.SymbolToName,
+                CorrectAnswer = el.Name,
+                Choices = choices,
+                Prompt = "Quel est le nom de cet élément ?",
+                DisplayValue = el.Symbol,
+                FunFact = el.FunFact,
+                CommonUse = el.CommonUse,
+                WhereToFind = el.WhereToFind
+            };
         }
 
         // ── Private helpers ──────────────────────────────────────────────────────
