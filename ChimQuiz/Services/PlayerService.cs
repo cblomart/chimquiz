@@ -36,8 +36,8 @@ namespace ChimQuiz.Services
             ValidatePseudo(pseudo);
 
             // AnyAsync generates EXISTS(SELECT 1 FROM root ...) which Cosmos DB rejects (SC2001).
-            // CountAsync on a filtered Take(1) generates a simple SELECT query that works.
-            if (await db.Players.Where(p => p.Pseudo == pseudo).Take(1).CountAsync() > 0)
+            // FirstOrDefaultAsync generates SELECT TOP 1 which Cosmos DB supports.
+            if (await db.Players.Where(p => p.Pseudo == pseudo).FirstOrDefaultAsync() is not null)
             {
                 throw new ArgumentException($"Le pseudo '{pseudo}' est déjà utilisé.");
             }
@@ -55,7 +55,7 @@ namespace ChimQuiz.Services
             Player player = await db.Players.FindAsync(id)
                 ?? throw new ArgumentException("Joueur introuvable.");
 
-            if (await db.Players.Where(p => p.Pseudo == newPseudo && p.Id != id).Take(1).CountAsync() > 0)
+            if (await db.Players.Where(p => p.Pseudo == newPseudo && p.Id != id).FirstOrDefaultAsync() is not null)
             {
                 throw new ArgumentException($"Le pseudo '{newPseudo}' est déjà utilisé.");
             }
@@ -140,8 +140,8 @@ namespace ChimQuiz.Services
                 RankEmoji = player.RankEmoji
             };
 
-            // Avoid duplicate session saves — partition key (PlayerId) + Take(1) avoids SC2001
-            if (await db.GameSessions.Where(s => s.PlayerId == playerId && s.Id == session.Id).Take(1).CountAsync() == 0)
+            // Avoid duplicate session saves — FirstOrDefaultAsync generates SELECT TOP 1, avoids SC2001
+            if (await db.GameSessions.Where(s => s.PlayerId == playerId && s.Id == session.Id).FirstOrDefaultAsync() is null)
             {
                 _ = db.GameSessions.Add(session);
             }
