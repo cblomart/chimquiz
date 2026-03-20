@@ -6,6 +6,7 @@ export const state = {
     lastResult: null,           // replaces window._lastResult
 
     cardShownAt: 0,
+    infoCardTimer: null,
 
     nextQuestionTimer: null,
     timerInterval: null,

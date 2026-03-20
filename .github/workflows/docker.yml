@@ -66,6 +66,9 @@ jobs:
       - name: ESLint (quality + security + complexity)
         run: npm run lint
 
+      - name: Vitest unit tests
+        run: npm test
+
   # ── 3. Cyclomatic complexity (C# + JS) ───────────────────────────────────
   complexity:
     name: Complexity Check
@@ -90,6 +93,7 @@ jobs:
       - name: Complexity — JS (fail > CCN 15)
         run: |
           lizard ChimQuiz/wwwroot/js/src -l javascript \
+            --exclude "ChimQuiz/wwwroot/js/src/__tests__/*" \
             --CCN 15 \
             --length 80 \
             --warnings_only \

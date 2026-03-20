@@ -256,9 +256,9 @@ function handleAnswerResult(result, givenAnswer) {
 
     // Show element info card (always, after every answer) — replaces question in-place
     if (result.isRevengeStart) {
-        setTimeout(() => showRevengeOverlay(result), 400);
+        state.infoCardTimer = setTimeout(() => showRevengeOverlay(result), 400);
     } else {
-        setTimeout(() => showInfoCard(result), 400);
+        state.infoCardTimer = setTimeout(() => showInfoCard(result), 400);
     }
 }
 
@@ -354,7 +354,8 @@ function hideInfoCard() {
         const el = document.getElementById(id);
         if (el) el.style.visibility = '';
     });
-    clearTimers();
+    clearTimers(); // also cancels infoCardTimer and clears timerInterval
+    state.cardShownAt = 0;
 }
 
 function scheduleNextQuestion(result, delayMs) {

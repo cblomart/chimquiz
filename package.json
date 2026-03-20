@@ -4,12 +4,14 @@
   "type": "module",
   "scripts": {
     "lint": "eslint ChimQuiz/wwwroot/js/src/",
+    "test": "vitest run",
     "build": "esbuild ChimQuiz/wwwroot/js/src/main.js --bundle --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/js/quiz.js && esbuild ChimQuiz/wwwroot/css/app.css --minify --allow-overwrite --outfile=ChimQuiz/wwwroot/css/app.css",
     "build:dev": "esbuild ChimQuiz/wwwroot/js/src/main.js --bundle --allow-overwrite --outfile=ChimQuiz/wwwroot/js/quiz.js"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",
     "eslint": "^9.0.0",
-    "eslint-plugin-security": "^3.0.0"
+    "eslint-plugin-security": "^3.0.0",
+    "vitest": "^4.1.0"
   }
 }

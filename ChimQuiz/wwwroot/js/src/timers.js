@@ -10,8 +10,10 @@ export const BONUS_XP_THRESHOLD_MS  = 6000; // stay ≥6s → show bonus XP visu
 export function clearTimers() {
     clearTimeout(state.nextQuestionTimer);
     clearInterval(state.timerInterval);
+    clearTimeout(state.infoCardTimer);
     state.nextQuestionTimer = null;
     state.timerInterval = null;
+    state.infoCardTimer = null;
 }
 
 // ── Question timer ────────────────────────────────────────────────────────────
