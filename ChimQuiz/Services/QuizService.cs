@@ -112,6 +112,23 @@ namespace ChimQuiz.Services
             SaveState(session, state);
 
             Element? element = elementService.GetById(q.ElementId);
+            return BuildAnswerResult(q, state, element, isCorrect, wasFuzzy, xpEarned, isGameOver, isRevengeStart);
+        }
+
+        private AnswerResult BuildAnswerResult(
+            QuizQuestionState q,
+            QuizSessionState state,
+            Element? element,
+            bool isCorrect,
+            bool wasFuzzy,
+            int xpEarned,
+            bool isGameOver,
+            bool isRevengeStart)
+        {
+            int atomicNumber = element?.AtomicNumber ?? 0;
+            int neutrons = element is not null
+                ? (int)Math.Round(element.AtomicMass) - element.AtomicNumber
+                : 0;
 
             return new AnswerResult
             {
@@ -134,9 +151,9 @@ namespace ChimQuiz.Services
                 WhereToFind = q.WhereToFind,
                 FunFact = q.FunFact,
                 ComboMessage = isCorrect ? GetComboMessage(state.ComboCount) : "",
-                AtomicNumber = element?.AtomicNumber ?? 0,
-                Protons = element?.AtomicNumber ?? 0,
-                Neutrons = element is not null ? (int)Math.Round(element.AtomicMass) - element.AtomicNumber : 0
+                AtomicNumber = atomicNumber,
+                Protons = atomicNumber,
+                Neutrons = neutrons
             };
         }
 
