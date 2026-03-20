@@ -89,7 +89,7 @@ jobs:
 
       - name: Complexity — JS (fail > CCN 15)
         run: |
-          lizard ChimQuiz/wwwroot/js -l javascript \
+          lizard ChimQuiz/wwwroot/js/src -l javascript \
             --CCN 15 \
             --length 80 \
             --warnings_only \

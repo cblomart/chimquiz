@@ -186,7 +186,7 @@ namespace ChimQuiz.Tests.Services
         {
             FakeSession session = NewSession();
             _svc.StartNewSession(session, _playerId);
-            (QuizQuestionState q, int index, int total, int combo, int xp, bool isRevenge) = _svc.GetCurrentQuestion(session);
+            (QuizQuestionState? q, int index, int total, int combo, int xp, bool isRevenge) = _svc.GetCurrentQuestion(session);
 
             Assert.NotNull(q);
             Assert.Equal(0, index);
@@ -201,7 +201,7 @@ namespace ChimQuiz.Tests.Services
         {
             FakeSession session = NewSession();
             _svc.StartNewSession(session, _playerId);
-            (QuizQuestionState q, int _, int _, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
+            (QuizQuestionState? q, int _, int _, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
 
             Assert.NotNull(q);
             Assert.Equal("", q.CorrectAnswer);
@@ -212,7 +212,7 @@ namespace ChimQuiz.Tests.Services
         {
             FakeSession session = NewSession();
             _svc.StartNewSession(session, _playerId);
-            (QuizQuestionState q, int _, int _, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
+            (QuizQuestionState? q, int _, int _, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
 
             Assert.NotNull(q);
             Assert.Null(q.FunFact);
@@ -222,7 +222,7 @@ namespace ChimQuiz.Tests.Services
         public void GetCurrentQuestion_NoSession_ReturnsNull()
         {
             FakeSession session = NewSession();
-            (QuizQuestionState q, int _, int _, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
+            (QuizQuestionState? q, int _, int _, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
             Assert.Null(q);
         }
 
@@ -431,7 +431,7 @@ namespace ChimQuiz.Tests.Services
                 _svc.SubmitAnswer(session, state.Questions[i].CorrectAnswer);
             }
 
-            (QuizQuestionState q, int _, int _, int _, int _, bool isRevenge) = _svc.GetCurrentQuestion(session);
+            (QuizQuestionState? q, int _, int _, int _, int _, bool isRevenge) = _svc.GetCurrentQuestion(session);
             Assert.NotNull(q);
             Assert.True(isRevenge);
         }
@@ -448,7 +448,7 @@ namespace ChimQuiz.Tests.Services
                 _svc.SubmitAnswer(session, state.Questions[i].CorrectAnswer);
             }
 
-            (QuizQuestionState _, int index, int total, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
+            (QuizQuestionState? _, int index, int total, int _, int _, bool _) = _svc.GetCurrentQuestion(session);
             Assert.Equal(0, index);   // first revenge question = index 0
             Assert.True(total <= 5);  // at most 5 revenge questions
         }
