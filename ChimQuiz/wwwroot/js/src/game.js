@@ -295,12 +295,18 @@ function renderSpellingCorrection(result) {
 }
 
 function setElementIdentity(result) {
-    const symbol  = document.getElementById('info-symbol');
-    const atomNum = document.getElementById('info-atomic-number');
-    const name    = document.getElementById('info-name');
-    if (symbol)  symbol.textContent  = result.elementSymbol;
-    if (atomNum) atomNum.textContent = `#${state.currentQuestion?.elementId ?? ''}`;
-    if (name)    name.textContent    = result.elementName;
+    const symbol    = document.getElementById('info-symbol');
+    const atomNum   = document.getElementById('info-atomic-number');
+    const name      = document.getElementById('info-name');
+    const protons   = document.getElementById('info-protons');
+    const neutrons  = document.getElementById('info-neutrons');
+    const electrons = document.getElementById('info-electrons');
+    if (symbol)    symbol.textContent    = result.elementSymbol;
+    if (atomNum)   atomNum.textContent   = `#${result.atomicNumber ?? ''}`;
+    if (name)      name.textContent      = result.elementName;
+    if (protons)   protons.textContent   = result.protons ?? '';
+    if (neutrons)  neutrons.textContent  = result.neutrons ?? '';
+    if (electrons) electrons.textContent = result.protons ?? '';
 }
 
 function renderFunFact(result) {

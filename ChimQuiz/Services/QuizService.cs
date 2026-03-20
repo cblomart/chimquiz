@@ -27,6 +27,9 @@ namespace ChimQuiz.Services
         public string WhereToFind { get; set; } = "";
         public string? FunFact { get; set; }
         public string ComboMessage { get; set; } = "";
+        public int AtomicNumber { get; set; }
+        public int Protons { get; set; }
+        public int Neutrons { get; set; }
     }
 
     public class QuizService(ElementService elementService)
@@ -130,7 +133,10 @@ namespace ChimQuiz.Services
                 CommonUse = q.CommonUse,
                 WhereToFind = q.WhereToFind,
                 FunFact = q.FunFact,
-                ComboMessage = isCorrect ? GetComboMessage(state.ComboCount) : ""
+                ComboMessage = isCorrect ? GetComboMessage(state.ComboCount) : "",
+                AtomicNumber = element?.AtomicNumber ?? 0,
+                Protons = element?.AtomicNumber ?? 0,
+                Neutrons = element is not null ? (int)Math.Round(element.AtomicMass) - element.AtomicNumber : 0
             };
         }
 
