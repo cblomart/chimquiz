@@ -15,7 +15,7 @@ namespace ChimQuiz.Api
             return group;
         }
 
-        private static async Task<IResult> StartQuiz(HttpContext ctx, QuizService quizService, PlayerService playerService)
+        private static async Task<IResult> StartQuiz(HttpContext ctx, QuizService quizService, PlayerService playerService, [FromBody] StartQuizRequest? req)
         {
             if (!ctx.Request.Cookies.TryGetValue(PlayerCookieName, out string? idStr) ||
                 !Guid.TryParse(idStr, out Guid playerId))
@@ -27,7 +27,7 @@ namespace ChimQuiz.Api
             Models.Player? player = await playerService.GetPlayerAsync(playerId);
             int playerXp = player?.TotalXp ?? 0;
 
-            Models.QuizSessionState state = quizService.StartNewSession(ctx.Session, playerId, playerXp);
+            Models.QuizSessionState state = quizService.StartNewSession(ctx.Session, playerId, playerXp, req?.QuestionCount ?? 15);
             return Results.Ok(new { state.SessionId, TotalQuestions = state.Questions.Count });
         }
 
@@ -89,5 +89,6 @@ namespace ChimQuiz.Api
         }
 
         private sealed record AnswerRequest(string Answer);
+        private sealed record StartQuizRequest(int QuestionCount);
     }
 }

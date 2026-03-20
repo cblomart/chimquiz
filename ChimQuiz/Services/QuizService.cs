@@ -31,7 +31,9 @@ namespace ChimQuiz.Services
     public class QuizService(ElementService elementService)
     {
         private const string SessionKey = "quiz_state";
-        private const int TotalQuestions = 15;
+        private const int DefaultQuestions = 15;
+        private const int MinQuestions = 5;
+        private const int MaxQuestions = 30;
         private readonly Random _random = new();
 
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -40,13 +42,14 @@ namespace ChimQuiz.Services
             Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
         };
 
-        public QuizSessionState StartNewSession(ISession session, Guid playerId, int playerXp = 0)
+        public QuizSessionState StartNewSession(ISession session, Guid playerId, int playerXp = 0, int questionCount = DefaultQuestions)
         {
+            int count = Math.Clamp(questionCount, MinQuestions, MaxQuestions);
             QuizSessionState state = new()
             {
                 PlayerId = playerId,
                 StartedAt = DateTime.UtcNow,
-                Questions = GenerateQuestions(playerXp)
+                Questions = GenerateQuestions(playerXp, count)
             };
             SaveState(session, state);
             return state;
@@ -192,12 +195,18 @@ namespace ChimQuiz.Services
             };
         }
 
-        private List<QuizQuestionState> GenerateQuestions(int playerXp = 0)
+        private List<QuizQuestionState> GenerateQuestions(int playerXp = 0, int total = DefaultQuestions)
         {
-            (int maxZ, int nameToSymbolCount, int symbolToNameCount, int symbolTypedCount) = GetDifficulty(playerXp);
+            (int maxZ, int nameToSymbolBase, int symbolToNameBase, int symbolTypedBase) = GetDifficulty(playerXp);
+            int baseTotal = nameToSymbolBase + symbolToNameBase + symbolTypedBase; // always 15
+
+            // Scale each bucket proportionally; give remainder to typed
+            int nameToSymbolCount = (int)Math.Round((double)nameToSymbolBase * total / baseTotal);
+            int symbolToNameCount = (int)Math.Round((double)symbolToNameBase * total / baseTotal);
+            int symbolTypedCount = total - nameToSymbolCount - symbolToNameCount;
 
             HashSet<int> usedIds = [];
-            List<QuizQuestionState> questions = new(TotalQuestions);
+            List<QuizQuestionState> questions = new(total);
 
             // Name → Symbol (MCQ) — confusable distractors
             for (int i = 0; i < nameToSymbolCount; i++)

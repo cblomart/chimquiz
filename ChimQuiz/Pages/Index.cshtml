@@ -87,13 +87,21 @@
                 />
                 <div id="pseudo-error" class="input-error" style="display:none;"></div>
                 <p class="pseudo-hint">🔒 Ton pseudo est unique — personne ne peut te le voler.</p>
+                <label class="input-label" for="question-count">Nombre de questions</label>
+                <div class="question-count-selector" id="question-count" role="group" aria-label="Nombre de questions">
+                    <button type="button" class="qcount-btn" data-count="5">5</button>
+                    <button type="button" class="qcount-btn" data-count="10">10</button>
+                    <button type="button" class="qcount-btn qcount-btn--active" data-count="15">15</button>
+                    <button type="button" class="qcount-btn" data-count="20">20</button>
+                    <button type="button" class="qcount-btn" data-count="30">30</button>
+                </div>
                 <button id="start-btn" class="btn btn-primary btn-large">
                     <span class="btn-icon">⚡</span>
                     Jouer !
                 </button>
             </div>
             <div class="play-card-hint">
-                10 questions · Symboles &amp; Noms · Combos &amp; XP
+                Symboles &amp; Noms · Combos &amp; XP
             </div>
         </div>
     </div>
@@ -107,7 +115,7 @@
             <div class="stat-label">Éléments</div>
         </div>
         <div class="stat-item">
-            <div class="stat-number gradient-text">10</div>
+            <div class="stat-number gradient-text" id="stat-qcount">15</div>
             <div class="stat-label">Questions/partie</div>
         </div>
         <div class="stat-item">

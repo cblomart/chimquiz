@@ -63,6 +63,20 @@ function initHomePage() {
         input.placeholder = generateClientPseudo();
     }
 
+    // Question count selector
+    let selectedCount = parseInt(sessionStorage.getItem('questionCount') || '15', 10);
+    const qcountBtns = document.querySelectorAll('.qcount-btn');
+    const statQcount = document.getElementById('stat-qcount');
+
+    function setCount(n) {
+        selectedCount = n;
+        sessionStorage.setItem('questionCount', n);
+        qcountBtns.forEach(b => b.classList.toggle('qcount-btn--active', parseInt(b.dataset.count, 10) === n));
+        if (statQcount) statQcount.textContent = n;
+    }
+    setCount(selectedCount);
+    qcountBtns.forEach(b => b.addEventListener('click', () => setCount(parseInt(b.dataset.count, 10))));
+
     startBtn.addEventListener('click', async () => {
         const pseudo = input.value.trim() || input.placeholder;
         if (errorEl) errorEl.style.display = 'none';
@@ -120,7 +134,8 @@ async function initQuizPage() {
         if (streakEl) streakEl.textContent = window.player.currentStreak;
     }
 
-    const startRes = await apiFetch('/api/quiz/start', 'POST', {});
+    const questionCount = parseInt(sessionStorage.getItem('questionCount') || '15', 10);
+    const startRes = await apiFetch('/api/quiz/start', 'POST', { questionCount });
     if (!startRes.ok) {
         if (startRes.status === 401) { window.location.href = '/'; return; }
         console.error('Failed to start quiz');

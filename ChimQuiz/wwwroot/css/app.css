@@ -307,6 +307,32 @@ img { max-width: 100%; display: block; }
   margin: 0;
 }
 
+.question-count-selector {
+  display: flex;
+  gap: 0.5rem;
+}
+.qcount-btn {
+  flex: 1;
+  padding: 0.5rem 0;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.qcount-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+.qcount-btn--active {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  border-color: transparent;
+  color: #fff;
+}
+
 .play-card-hint {
   margin-top: 1rem;
   text-align: center;
