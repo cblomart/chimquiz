@@ -193,6 +193,12 @@ namespace ChimQuiz.Services
                 return (string.Equals(answer.Trim(), q.CorrectAnswer, StringComparison.OrdinalIgnoreCase), false);
             }
 
+            // Symbol answers: case-insensitive exact match only (no fuzzy — 1-3 chars)
+            if (q.Type == QuestionType.NameToSymbolTyped)
+            {
+                return (string.Equals(answer.Trim(), q.CorrectAnswer, StringComparison.OrdinalIgnoreCase), false);
+            }
+
             string na = Normalize(answer);
             string nc = Normalize(q.CorrectAnswer);
             if (na == nc)
@@ -382,8 +388,12 @@ namespace ChimQuiz.Services
                 });
             }
 
+            // Split typed budget: half Symbol→Name, half Name→Symbol
+            int symbolToNameTypedCount = symbolTypedCount / 2;
+            int nameToSymbolTypedCount = symbolTypedCount - symbolToNameTypedCount;
+
             // Symbol → Name (saisie libre — apprendre l'orthographe!)
-            for (int i = 0; i < symbolTypedCount; i++)
+            for (int i = 0; i < symbolToNameTypedCount; i++)
             {
                 Element el = elementService.GetWeightedRandom(usedIds, maxZ);
                 _ = usedIds.Add(el.AtomicNumber);
@@ -393,8 +403,27 @@ namespace ChimQuiz.Services
                     Type = QuestionType.SymbolToNameTyped,
                     CorrectAnswer = el.Name,
                     Choices = [],
-                    Prompt = "Écris le nom de cet élément (orthographe correcte) :",
+                    Prompt = "Écris le nom de cet élément :",
                     DisplayValue = el.Symbol,
+                    FunFact = el.FunFact,
+                    CommonUse = el.CommonUse,
+                    WhereToFind = el.WhereToFind
+                });
+            }
+
+            // Name → Symbol (saisie libre — rapide et satisfaisant!)
+            for (int i = 0; i < nameToSymbolTypedCount; i++)
+            {
+                Element el = elementService.GetWeightedRandom(usedIds, maxZ);
+                _ = usedIds.Add(el.AtomicNumber);
+                questions.Add(new QuizQuestionState
+                {
+                    ElementId = el.AtomicNumber,
+                    Type = QuestionType.NameToSymbolTyped,
+                    CorrectAnswer = el.Symbol,
+                    Choices = [],
+                    Prompt = "Écris le symbole de cet élément :",
+                    DisplayValue = el.Name,
                     FunFact = el.FunFact,
                     CommonUse = el.CommonUse,
                     WhereToFind = el.WhereToFind

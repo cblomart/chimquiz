@@ -84,6 +84,7 @@
                     autocomplete="off"
                     autocorrect="off"
                     spellcheck="false"
+                    inputmode="text"
                 />
                 <button id="submit-typed" class="btn btn-primary typed-submit-btn" onclick="submitTypedAnswer()">
                     Valider →
@@ -109,7 +110,7 @@
                 </div>
             </div>
 
-            <!-- Element identity -->
+            <!-- Element identity + atomic numbers compact -->
             <div class="info-element-header">
                 <div class="info-symbol-badge">
                     <span id="info-symbol" class="info-symbol-large"></span>
@@ -117,46 +118,23 @@
                 </div>
                 <div class="info-element-meta">
                     <div id="info-name" class="info-element-name"></div>
+                    <div class="info-atomic-compact">
+                        <span id="info-protons"></span>p⁺&thinsp;·&thinsp;<span id="info-neutrons"></span>n⁰&thinsp;·&thinsp;<span id="info-electrons"></span>e⁻
+                    </div>
                 </div>
             </div>
 
-            <!-- Atomic structure -->
-            <div class="atomic-structure">
-                <div class="atomic-particle proton-particle">
-                    <span class="particle-count" id="info-protons"></span>
-                    <span class="particle-label">p⁺ Protons</span>
-                </div>
-                <div class="atomic-particle neutron-particle">
-                    <span class="particle-count" id="info-neutrons"></span>
-                    <span class="particle-label">n⁰ Neutrons</span>
-                </div>
-                <div class="atomic-particle electron-particle">
-                    <span class="particle-count" id="info-electrons"></span>
-                    <span class="particle-label">e⁻ Électrons</span>
-                </div>
-            </div>
-
-            <!-- Fun fact — HERO (most important, shown first) -->
+            <!-- Fun fact — HERO -->
             <div id="info-fact-block" class="info-fact-block" style="display:none;">
-                <div class="info-fact-title">🤯 Le saviez-vous ?</div>
                 <p id="info-fact-text" class="info-fact-text"></p>
             </div>
 
-            <!-- Compact info rows -->
-            <div class="info-rows">
-                <div class="info-row" id="info-use-row">
-                    <span class="info-row-icon">💡</span>
-                    <div class="info-row-content">
-                        <span class="info-row-label">Utilisation</span>
-                        <span id="info-use-text" class="info-row-text"></span>
-                    </div>
-                </div>
-                <div class="info-row" id="info-where-row">
-                    <span class="info-row-icon">🌍</span>
-                    <div class="info-row-content">
-                        <span class="info-row-label">Où le trouver</span>
-                        <span id="info-where-text" class="info-row-text"></span>
-                    </div>
+            <!-- Utilisation (1 ligne) -->
+            <div class="info-row" id="info-use-row">
+                <span class="info-row-icon">💡</span>
+                <div class="info-row-content">
+                    <span class="info-row-label">Utilisation</span>
+                    <span id="info-use-text" class="info-row-text"></span>
                 </div>
             </div>
 

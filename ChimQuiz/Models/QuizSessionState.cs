@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ChimQuiz.Models
 {
-    public enum QuestionType { NameToSymbol, SymbolToName, SymbolToNameTyped }
+    public enum QuestionType { NameToSymbol, SymbolToName, SymbolToNameTyped, NameToSymbolTyped }
 
     public class QuizQuestionState
     {
@@ -16,7 +16,7 @@ namespace ChimQuiz.Models
         public string CommonUse { get; set; } = "";
         public string WhereToFind { get; set; } = "";
         [JsonIgnore]
-        public bool IsTyped => Type == QuestionType.SymbolToNameTyped;
+        public bool IsTyped => Type is QuestionType.SymbolToNameTyped or QuestionType.NameToSymbolTyped;
     }
 
     public class QuizSessionState

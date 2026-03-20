@@ -53,13 +53,17 @@ export async function loadNextQuestion() {
     renderQuestion(state.currentQuestion);
 }
 
-function setupTypedInput() {
+function setupTypedInput(isSymbol = false) {
     const typedInput = document.getElementById('typed-answer');
     const submitBtn  = document.getElementById('submit-typed');
     if (typedInput) {
-        typedInput.value    = '';
-        typedInput.disabled = false;
-        typedInput.className = 'typed-answer-input';
+        typedInput.value       = '';
+        typedInput.disabled    = false;
+        typedInput.className   = 'typed-answer-input';
+        typedInput.maxLength   = isSymbol ? 3 : 50;
+        typedInput.placeholder = isSymbol
+            ? 'Symbole (ex : Fe, Na, O)…'
+            : "Nom de l'élément…";
         setTimeout(() => typedInput.focus(), 350);
     }
     if (submitBtn) submitBtn.disabled = false;
@@ -102,7 +106,8 @@ function renderQuestionHeader(q) {
 }
 
 function renderQuestion(q) {
-    const isTyped = q.type === 'SymbolToNameTyped';
+    const isTyped        = q.type === 'SymbolToNameTyped' || q.type === 'NameToSymbolTyped';
+    const isSymbolTyped  = q.type === 'NameToSymbolTyped';
 
     const promptEl    = document.getElementById('question-prompt');
     const displayEl   = document.getElementById('display-value');
@@ -118,7 +123,7 @@ function renderQuestion(q) {
     if (typedArea)   typedArea.style.display   = isTyped ? 'flex' : 'none';
 
     if (isTyped) {
-        setupTypedInput();
+        setupTypedInput(isSymbolTyped);
     } else {
         setupMCQButtons(q.choices);
     }
@@ -318,9 +323,7 @@ function renderFunFact(result) {
 
 function renderElementDetails(result) {
     const useText = document.getElementById('info-use-text');
-    const where   = document.getElementById('info-where-text');
-    if (useText) useText.textContent = result.commonUse   || '';
-    if (where)   where.textContent   = result.whereToFind || '';
+    if (useText) useText.textContent = result.commonUse || '';
 }
 
 function showInfoCard(result) {
