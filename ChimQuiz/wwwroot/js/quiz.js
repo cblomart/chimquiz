@@ -481,16 +481,10 @@ function startInfoTimer(seconds) {
         fill.style.width = '0%';
     }
     if (label) label.textContent = `${seconds}s`;
-    if (nextLbl) nextLbl.textContent = 'J\'ai lu !';
 
     timerInterval = setInterval(() => {
         remaining--;
         if (label) label.textContent = `${Math.max(0, remaining)}s`;
-
-        // Bonus XP visual unlock at 6s elapsed (≥ threshold)
-        if (remaining === seconds - BONUS_XP_THRESHOLD_MS / 1000 && nextLbl) {
-            nextLbl.textContent = '📚 J\'ai lu ! (+5 XP)';
-        }
     }, 1000);
 }
 
