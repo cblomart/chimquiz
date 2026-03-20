@@ -481,6 +481,7 @@ function startInfoTimer(seconds) {
         fill.style.width = '0%';
     }
     if (label) label.textContent = `${seconds}s`;
+    if (nextLbl) nextLbl.textContent = 'J\'ai lu !';
 
     timerInterval = setInterval(() => {
         remaining--;
@@ -496,6 +497,7 @@ function startInfoTimer(seconds) {
 function scheduleNextQuestion(result, delayMs) {
     clearTimeout(nextQuestionTimer);
     nextQuestionTimer = setTimeout(async () => {
+        cardShownAt = 0;
         clearTimers();
         if (result.isGameOver) {
             gameActive = false;
