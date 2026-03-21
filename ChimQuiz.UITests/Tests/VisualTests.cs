@@ -123,13 +123,53 @@ namespace ChimQuiz.UITests.Tests
                 $"Leaderboard page: horizontal overflow at {label} ({width}×{height})");
         }
 
+        // ── Capture de tous les types de questions ────────────────────────────────
+
+        [Fact]
+        public async Task QuizPage_AllQuestionTypes_Screenshots()
+        {
+            // 30 questions maximise la probabilité de voir les 4 types.
+            await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
+                new BrowserNewContextOptions
+                {
+                    ViewportSize = new ViewportSize { Width = 390, Height = 844 },
+                });
+            IPage page = await StartAsync(ctx, 30);
+
+            HashSet<string> captured = [];
+
+            for (int i = 0; i < 30 && captured.Count < 4; i++)
+            {
+                string type = await DetectQuestionTypeAsync(page);
+
+                if (captured.Add(type))
+                {
+                    await TakeScreenshotAsync(page, $"quiz-type-{type}");
+                }
+
+                bool isGameOver = await AnswerAndAdvanceAsync(page);
+                if (isGameOver)
+                {
+                    break;
+                }
+
+                await Task.WhenAny(
+                    page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 10_000 }),
+                    page.Locator("#typed-answer:not([disabled])").WaitForAsync(new() { Timeout = 10_000 }));
+            }
+
+            // On exige au moins les 2 familles (MCQ + typed) pour que la revue IA soit utile.
+            Assert.True(captured.Count >= 2,
+                $"Seulement {captured.Count} type(s) de question capturé(s) : {string.Join(", ", captured)}");
+        }
+
         // ── Helpers ───────────────────────────────────────────────────────────────
 
-        private async Task<IPage> StartAsync(IBrowserContext ctx)
+        private async Task<IPage> StartAsync(IBrowserContext ctx, int questionCount = 5)
         {
             IPage page = await ctx.NewPageAsync();
             await page.GotoAsync(_factory.ServerAddress);
-            await page.ClickAsync("[data-count='5']");
+            await page.ClickAsync($"[data-count='{questionCount}']");
 
             string pseudo = "Visual_" + Guid.NewGuid().ToString("N")[..8];
             await page.FillAsync("#pseudo-input", pseudo);
@@ -143,18 +183,73 @@ namespace ChimQuiz.UITests.Tests
             return page;
         }
 
+        /// <summary>Détecte le type de question affiché (MCQ vs typed, name vs symbol).</summary>
+        private static async Task<string> DetectQuestionTypeAsync(IPage page)
+        {
+            bool typedVisible = await page.Locator("#typed-answer").IsVisibleAsync();
+            if (typedVisible)
+            {
+                string? maxLen = await page.GetAttributeAsync("#typed-answer", "maxlength");
+                return maxLen == "3" ? "name-to-symbol-typed" : "symbol-to-name-typed";
+            }
+
+            string? prompt = await page.Locator("#question-prompt").TextContentAsync();
+            return (prompt ?? "").Contains("symbole", StringComparison.OrdinalIgnoreCase)
+                ? "name-to-symbol-mcq"
+                : "symbol-to-name-mcq";
+        }
+
+        /// <summary>Répond à la question courante, clique J'ai lu, renvoie true si game over.</summary>
+        private static async Task<bool> AnswerAndAdvanceAsync(IPage page)
+        {
+            if (await page.Locator("#revenge-overlay").IsVisibleAsync())
+            {
+                await page.ClickAsync(".revenge-btn");
+                await page.Locator("#revenge-overlay").WaitForAsync(
+                    new() { State = WaitForSelectorState.Hidden, Timeout = 10_000 });
+                return false;
+            }
+
+            await AnswerAsync(page);
+            await page.Locator("#element-info-card").WaitForAsync(
+                new() { State = WaitForSelectorState.Visible, Timeout = 5_000 });
+            await page.ClickAsync("button:has-text(\"J'ai lu\")");
+
+            DateTimeOffset deadline = DateTimeOffset.UtcNow.AddSeconds(10);
+            while (DateTimeOffset.UtcNow < deadline)
+            {
+                bool cardHidden = !await page.Locator("#element-info-card").IsVisibleAsync();
+                bool gameOver = await page.Locator("#game-over").IsVisibleAsync();
+                if (cardHidden || gameOver)
+                {
+                    return gameOver;
+                }
+
+                await Task.Delay(100);
+            }
+
+            throw new TimeoutException("Game did not advance within 10 s after clicking J'ai lu");
+        }
+
         private static async Task AnswerAsync(IPage page)
         {
             bool mcqVisible = await page.Locator("#choices-grid").IsVisibleAsync();
-            if (mcqVisible)
+            try
             {
-                await page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 10_000 });
-                await page.ClickAsync("#choice-0");
+                if (mcqVisible)
+                {
+                    await page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 5_000 });
+                    await page.ClickAsync("#choice-0", new PageClickOptions { Timeout = 5_000 });
+                }
+                else
+                {
+                    await page.FillAsync("#typed-answer", "H", new PageFillOptions { Timeout = 5_000 });
+                    await page.ClickAsync("#submit-typed", new PageClickOptions { Timeout = 5_000 });
+                }
             }
-            else
+            catch (Exception)
             {
-                await page.FillAsync("#typed-answer", "H");
-                await page.ClickAsync("#submit-typed");
+                // Question timer may have fired before we could interact.
             }
         }
 

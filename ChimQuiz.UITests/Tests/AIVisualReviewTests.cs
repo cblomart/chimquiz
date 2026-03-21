@@ -58,14 +58,16 @@ namespace ChimQuiz.UITests.Tests
 
             // ── 1–4 : Cohérence & bugs visuels par page ──────────────────────────
             await RunPageAnalysisAsync(http, apiKey, report, "Page d'accueil", "home");
-            await RunPageAnalysisAsync(http, apiKey, report, "Quiz — Question", "quiz-question");
             await RunPageAnalysisAsync(http, apiKey, report, "Quiz — Fiche info", "quiz-infocard");
             await RunPageAnalysisAsync(http, apiKey, report, "Leaderboard", "leaderboard");
 
-            // ── 5 : Psychologie adolescent ────────────────────────────────────────
+            // ── 5 : Tous les types de questions ──────────────────────────────────
+            await RunQuestionTypesAnalysisAsync(http, apiKey, report);
+
+            // ── 6 : Psychologie adolescent ────────────────────────────────────────
             await RunPsychologyAnalysisAsync(http, apiKey, report);
 
-            // ── 6 : Flow d'apprentissage ──────────────────────────────────────────
+            // ── 7 : Flow d'apprentissage ──────────────────────────────────────────
             await RunLearningFlowAnalysisAsync(http, apiKey, report);
 
             string reportPath = Path.Combine(ScreenshotsDir, "ai-review.md");
@@ -138,6 +140,77 @@ namespace ChimQuiz.UITests.Tests
             report.AppendLine();
 
             _output.WriteLine($"[{pageLabel}] analyse terminée.");
+        }
+
+        private async Task RunQuestionTypesAnalysisAsync(
+            HttpClient http,
+            string apiKey,
+            StringBuilder report)
+        {
+            string[] types =
+            [
+                "name-to-symbol-mcq",
+                "symbol-to-name-mcq",
+                "name-to-symbol-typed",
+                "symbol-to-name-typed",
+            ];
+            List<(string Path, string Label)> images = [];
+            foreach (string type in types)
+            {
+                string path = Path.Combine(ScreenshotsDir, $"quiz-type-{type}.png");
+                if (File.Exists(path))
+                {
+                    images.Add((path, type));
+                }
+            }
+
+            report.AppendLine("## Types de questions — Couverture visuelle");
+            report.AppendLine();
+
+            if (images.Count == 0)
+            {
+                report.AppendLine("⚠️ Aucun screenshot de type de question disponible.");
+                report.AppendLine();
+                return;
+            }
+
+            string prompt = $"""
+                Tu es expert en UX et contrôle qualité visuel pour applications web.
+                Les images ci-dessus montrent les {images.Count} type(s) de questions présents dans ChimQuiz
+                (quiz de chimie pour lycéens français), tous capturés sur mobile (390px).
+
+                Les 4 types possibles sont :
+                - name-to-symbol-mcq : on affiche le NOM de l'élément, on choisit parmi 4 SYMBOLES (MCQ)
+                - symbol-to-name-mcq : on affiche le SYMBOLE, on choisit parmi 4 NOMS (MCQ)
+                - name-to-symbol-typed : on affiche le NOM, on tape le SYMBOLE (saisie libre, max 3 chars)
+                - symbol-to-name-typed : on affiche le SYMBOLE, on tape le NOM (saisie libre)
+
+                Charte graphique : dark sci-fi, gradient cyan→violet→rose, Orbitron pour les valeurs, Nunito pour le texte.
+
+                Analyse chaque type de question visible :
+
+                ### 1. Lisibilité de la valeur affichée ✅/⚠️/❌
+                La valeur centrale (symbole ou nom de l'élément) est-elle immédiatement visible et lisible ?
+                Le gradient text sur fond sombre est-il suffisamment contrasté ?
+
+                ### 2. Clarté de l'interaction ✅/⚠️/❌
+                Pour le MCQ : les 4 choix sont-ils clairement identifiables comme boutons cliquables ?
+                Pour le typed : le champ de saisie est-il intuitif ? le placeholder aide-t-il ?
+
+                ### 3. Cohérence entre les types ✅/⚠️/❌
+                Les différents types partagent-ils la même identité visuelle ?
+                Le passage de l'un à l'autre serait-il naturel pour un joueur ?
+
+                Pour chaque problème : suggestion concrète et actionnable.
+                """;
+
+            string result = await CallClaudeAsync(http, apiKey, images, prompt);
+            report.AppendLine(result);
+            report.AppendLine();
+            report.AppendLine("---");
+            report.AppendLine();
+
+            _output.WriteLine("[Types de questions] analyse terminée.");
         }
 
         private async Task RunPsychologyAnalysisAsync(

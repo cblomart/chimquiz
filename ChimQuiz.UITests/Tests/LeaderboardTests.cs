@@ -113,15 +113,22 @@ namespace ChimQuiz.UITests.Tests
             }
 
             bool mcqVisible = await page.Locator("#choices-grid").IsVisibleAsync();
-            if (mcqVisible)
+            try
             {
-                await page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 10_000 });
-                await page.ClickAsync("#choice-0");
+                if (mcqVisible)
+                {
+                    await page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 5_000 });
+                    await page.ClickAsync("#choice-0", new PageClickOptions { Timeout = 5_000 });
+                }
+                else
+                {
+                    await page.FillAsync("#typed-answer", "H", new PageFillOptions { Timeout = 5_000 });
+                    await page.ClickAsync("#submit-typed", new PageClickOptions { Timeout = 5_000 });
+                }
             }
-            else
+            catch (Exception)
             {
-                await page.FillAsync("#typed-answer", "H");
-                await page.ClickAsync("#submit-typed");
+                // Question timer may have fired before we could interact — info card will still appear.
             }
 
             await page.Locator("#element-info-card").WaitForAsync(

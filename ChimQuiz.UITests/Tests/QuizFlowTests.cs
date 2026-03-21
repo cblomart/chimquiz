@@ -303,7 +303,7 @@ namespace ChimQuiz.UITests.Tests
                     await page.ClickAsync("#submit-typed", new PageClickOptions { Timeout = 5_000 });
                 }
             }
-            catch (PlaywrightException)
+            catch (Exception)
             {
                 // Question timer may have fired before we could click — the info card
                 // will appear via onQuestionTimeout, so AnswerAndAdvanceAsync can still proceed.
