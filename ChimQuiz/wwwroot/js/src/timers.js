@@ -11,9 +11,11 @@ export function clearTimers() {
     clearTimeout(state.nextQuestionTimer);
     clearInterval(state.timerInterval);
     clearTimeout(state.infoCardTimer);
+    clearTimeout(state.bonusReadyTimer);
     state.nextQuestionTimer = null;
     state.timerInterval = null;
     state.infoCardTimer = null;
+    state.bonusReadyTimer = null;
 }
 
 // ── Question timer ────────────────────────────────────────────────────────────

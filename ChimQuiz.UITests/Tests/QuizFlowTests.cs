@@ -175,8 +175,8 @@ namespace ChimQuiz.UITests.Tests
 
             Assert.True(int.TryParse(protons?.Trim(), out int p) && p > 0,
                 $"Protons should be a positive integer, got '{protons}'");
-            Assert.True(int.TryParse(neutrons?.Trim(), out int n) && n > 0,
-                $"Neutrons should be a positive integer, got '{neutrons}'");
+            Assert.True(int.TryParse(neutrons?.Trim(), out int n) && n >= 0,
+                $"Neutrons should be a non-negative integer, got '{neutrons}'");
             Assert.True(int.TryParse(electrons?.Trim(), out int e) && e > 0,
                 $"Electrons should be a positive integer, got '{electrons}'");
         }

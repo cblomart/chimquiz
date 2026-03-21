@@ -60,8 +60,6 @@ namespace ChimQuiz.UITests.Tests
                 });
             IPage page = await StartAsync(ctx);
 
-            await TakeScreenshotAsync(page, $"quiz-question-{label}");
-
             bool overflows = await page.EvaluateAsync<bool>(
                 "document.documentElement.scrollWidth > document.documentElement.clientWidth");
             Assert.False(overflows,
@@ -290,6 +288,9 @@ namespace ChimQuiz.UITests.Tests
         {
             try
             {
+                // Ensure web fonts (Orbitron, Nunito) are loaded before taking the screenshot
+                await page.EvaluateAsync("() => document.fonts.ready");
+
                 string dir = Path.GetFullPath(
                     Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "screenshots"));
                 Directory.CreateDirectory(dir);

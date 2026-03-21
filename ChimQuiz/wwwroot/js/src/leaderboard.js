@@ -54,21 +54,22 @@ function renderLeaderboard(tab, scores) {
             ? `<td class="rank-cell ${rankClasses[i]}">${rankIcons[i]}</td>`
             : `<td class="rank-cell">${i + 1}</td>`;
 
+        const scoreCls = s.score === 0 ? ' score-cell--zero' : '';
         return isAlltime
             ? `<tr${isMe ? ' class="is-me"' : ''}>${rankCell}
                 <td class="pseudo-cell">${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></td>
-                <td class="score-cell">${s.score} XP</td>
+                <td class="score-cell${scoreCls}">${s.score} XP</td>
                 <td>${escHtml(s.rankName)}</td>
                 <td class="streak-cell">🔥 ${s.currentStreak}</td></tr>`
             : `<tr${isMe ? ' class="is-me"' : ''}>${rankCell}
                 <td class="pseudo-cell">${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></td>
-                <td class="score-cell">${s.score} XP</td>
+                <td class="score-cell${scoreCls}">${s.score} XP</td>
                 <td>${s.correctAnswers}/15 ✅</td>
                 <td>Combo x${s.maxCombo}</td></tr>`;
     }).join('');
 
     const headers = isAlltime
-        ? '<th>#</th><th>Joueur</th><th>XP total</th><th>Rang</th><th>Série</th>'
+        ? '<th>#</th><th>Joueur</th><th>XP total</th><th>Rang</th><th class="streak-header"><span>Série</span></th>'
         : '<th>#</th><th>Joueur</th><th>Score</th><th>Précision</th><th>Combo</th>';
 
     container.innerHTML = `<table class="leaderboard-table glass-card"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>`;

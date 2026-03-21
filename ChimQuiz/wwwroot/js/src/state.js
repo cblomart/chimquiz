@@ -16,4 +16,5 @@ export const state = {
     questionStartedAt: 0,       // timestamp when timer started
 
     onQuestionTimeout: null,    // callback set by game.js to break circular dep with idle.js
+    bonusReadyTimer: null,
 };

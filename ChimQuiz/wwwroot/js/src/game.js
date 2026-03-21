@@ -117,7 +117,11 @@ function renderQuestion(q) {
     renderQuestionHeader(q);
 
     if (promptEl)  promptEl.textContent  = q.prompt;
-    if (displayEl) displayEl.textContent = q.displayValue;
+    if (displayEl) {
+        displayEl.textContent = q.displayValue;
+        // Short symbols (≤3 chars) get a larger size class so they don't look lost
+        displayEl.className = 'display-value' + (q.displayValue.length <= 3 ? ' display-value--symbol' : '');
+    }
 
     if (choicesGrid) choicesGrid.style.display = isTyped ? 'none' : 'grid';
     if (typedArea)   typedArea.style.display   = isTyped ? 'flex' : 'none';
@@ -345,11 +349,24 @@ function showInfoCard(result) {
         animateXpGain(3, '✍️ Parfait !');
     }
 
+    // Reset bonus button state
+    const nextBtn   = document.querySelector('.info-next-btn');
+    const bonusLabel = document.getElementById('info-bonus-label');
+    if (nextBtn)    nextBtn.classList.remove('bonus-ready');
+    if (bonusLabel) bonusLabel.style.display = 'none';
+
     state.cardShownAt = Date.now();
     card.style.display = 'flex';
     card.style.animation = 'none';
     void card.offsetHeight;
     card.style.animation = 'slideUp 0.35s ease forwards';
+
+    // After 6 s, reveal the +5 XP bonus indicator on the button
+    clearTimeout(state.bonusReadyTimer);
+    state.bonusReadyTimer = setTimeout(() => {
+        if (nextBtn)    nextBtn.classList.add('bonus-ready');
+        if (bonusLabel) bonusLabel.style.display = '';
+    }, BONUS_XP_THRESHOLD_MS);
 
     startInfoTimer(INFO_DISPLAY_SECONDS);
     scheduleNextQuestion(result, INFO_DISPLAY_SECONDS * 1000);
@@ -363,7 +380,12 @@ function hideInfoCard() {
         const el = document.getElementById(id);
         if (el) el.style.visibility = '';
     });
-    clearTimers(); // also cancels infoCardTimer and clears timerInterval
+    // Reset bonus button
+    const nextBtn    = document.querySelector('.info-next-btn');
+    const bonusLabel = document.getElementById('info-bonus-label');
+    if (nextBtn)    nextBtn.classList.remove('bonus-ready');
+    if (bonusLabel) bonusLabel.style.display = 'none';
+    clearTimers(); // also cancels infoCardTimer, timerInterval and bonusReadyTimer
     state.cardShownAt = 0;
 }
 

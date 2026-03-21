@@ -230,7 +230,7 @@ namespace ChimQuiz.UITests.Tests
             string apiKey,
             StringBuilder report)
         {
-            string[] names = ["home-mobile", "quiz-question-mobile", "quiz-infocard-mobile", "quiz-question-tablet"];
+            string[] names = ["home-mobile", "quiz-type-name-to-symbol-mcq-mobile", "quiz-infocard-mobile", "quiz-type-name-to-symbol-mcq-tablet"];
             List<(string Path, string Label)> images = [];
             foreach (string name in names)
             {
@@ -294,7 +294,7 @@ namespace ChimQuiz.UITests.Tests
             string apiKey,
             StringBuilder report)
         {
-            string[] names = ["quiz-question-mobile", "quiz-infocard-mobile"];
+            string[] names = ["quiz-type-name-to-symbol-mcq-mobile", "quiz-infocard-mobile"];
             List<(string Path, string Label)> images = [];
             foreach (string name in names)
             {
