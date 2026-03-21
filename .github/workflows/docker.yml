@@ -165,6 +165,15 @@ jobs:
       - name: Run UI tests
         run: dotnet test ChimQuiz.UITests/ --no-build --logger "console;verbosity=minimal"
 
+      - name: Upload visual screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: ChimQuiz.UITests/screenshots/
+          retention-days: 30
+          if-no-files-found: warn
+
   # ── 6. Security scan — Trivy ──────────────────────────────────────────────
   scan-trivy:
     name: Trivy Security Scan
