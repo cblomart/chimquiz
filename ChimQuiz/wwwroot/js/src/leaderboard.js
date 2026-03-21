@@ -59,7 +59,7 @@ function renderLeaderboard(tab, scores) {
             ? `<tr${isMe ? ' class="is-me"' : ''}>${rankCell}
                 <td class="pseudo-cell">${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></td>
                 <td class="score-cell${scoreCls}">${s.score} XP</td>
-                <td>${escHtml(s.rankName)}</td>
+                <td class="rank-name-cell">${escHtml(s.rankName)}</td>
                 <td class="streak-cell">🔥 ${s.currentStreak}</td></tr>`
             : `<tr${isMe ? ' class="is-me"' : ''}>${rankCell}
                 <td class="pseudo-cell">${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></td>
