@@ -26,6 +26,13 @@ fi
 echo "✅  Clé API détectée."
 echo
 
+# ── Nettoyage des anciens screenshots ────────────────────────────────────────
+SCREENSHOTS_DIR="$SCRIPT_DIR/ChimQuiz.UITests/screenshots"
+if [[ -d "$SCREENSHOTS_DIR" ]]; then
+    echo "🗑️   Nettoyage des anciens screenshots..."
+    rm -f "$SCREENSHOTS_DIR"/*.png "$SCREENSHOTS_DIR"/ai-review.md
+fi
+
 # ── Étape 1 : screenshots ─────────────────────────────────────────────────────
 echo "📸  Étape 1/2 — Génération des screenshots (VisualTests)..."
 dotnet test "$SCRIPT_DIR/ChimQuiz.UITests/ChimQuiz.UITests.csproj" \
