@@ -145,7 +145,10 @@ namespace ChimQuiz.Services
                 IsTyped = q.IsTyped,
                 WasFuzzyMatch = wasFuzzy,
                 IsRevengeStart = isRevengeStart,
-                ElementSymbol = q.DisplayValue,
+                ElementSymbol = element?.Symbol
+                    ?? (q.Type is QuestionType.NameToSymbol or QuestionType.NameToSymbolTyped
+                        ? q.CorrectAnswer
+                        : q.DisplayValue),
                 ElementName = element?.Name ?? q.CorrectAnswer,
                 CommonUse = q.CommonUse,
                 WhereToFind = q.WhereToFind,
