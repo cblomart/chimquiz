@@ -310,7 +310,10 @@ function setElementIdentity(result) {
     const protons   = document.getElementById('info-protons');
     const neutrons  = document.getElementById('info-neutrons');
     const electrons = document.getElementById('info-electrons');
-    if (symbol)    symbol.textContent    = result.elementSymbol;
+    if (symbol) {
+        symbol.textContent = result.elementSymbol;
+        symbol.className = 'info-symbol-large' + (result.elementSymbol.length > 1 ? ' info-symbol-wide' : '');
+    }
     if (atomNum)   atomNum.textContent   = `#${result.atomicNumber ?? ''}`;
     if (name)      name.textContent      = result.elementName;
     if (protons)   protons.textContent   = result.protons ?? '';
