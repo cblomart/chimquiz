@@ -102,6 +102,15 @@ namespace ChimQuiz.UITests.Tests
 
         private static async Task<bool> AnswerAndAdvanceAsync(IPage page)
         {
+            // Dismiss revenge overlay if it appeared after the last original question.
+            if (await page.Locator("#revenge-overlay").IsVisibleAsync())
+            {
+                await page.ClickAsync(".revenge-btn");
+                await page.Locator("#revenge-overlay").WaitForAsync(
+                    new() { State = WaitForSelectorState.Hidden, Timeout = 10_000 });
+                return false;
+            }
+
             bool mcqVisible = await page.Locator("#choices-grid").IsVisibleAsync();
             if (mcqVisible)
             {

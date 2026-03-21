@@ -251,6 +251,15 @@ namespace ChimQuiz.UITests.Tests
         /// <summary>Answers the current question, clicks J'ai lu, returns true if game over.</summary>
         private static async Task<bool> AnswerAndAdvanceAsync(IPage page)
         {
+            // Dismiss revenge overlay if it appeared after the last original question.
+            if (await page.Locator("#revenge-overlay").IsVisibleAsync())
+            {
+                await page.ClickAsync(".revenge-btn");
+                await page.Locator("#revenge-overlay").WaitForAsync(
+                    new() { State = WaitForSelectorState.Hidden, Timeout = 10_000 });
+                return false;
+            }
+
             await AnswerAsync(page);
             await page.Locator("#element-info-card").WaitForAsync(
                 new() { State = WaitForSelectorState.Visible, Timeout = 5_000 });
