@@ -15,6 +15,7 @@ ChimQuiz/wwwroot/lib/
 appsettings.*.json
 !appsettings.json
 !appsettings.Development.json
+.env
 
 # Node
 node_modules/
