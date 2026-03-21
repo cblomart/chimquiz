@@ -59,12 +59,12 @@ namespace ChimQuiz.UITests.Tests
                 });
             IPage page = await StartAsync(ctx);
 
+            await TakeScreenshotAsync(page, $"quiz-question-{label}");
+
             bool overflows = await page.EvaluateAsync<bool>(
                 "document.documentElement.scrollWidth > document.documentElement.clientWidth");
             Assert.False(overflows,
                 $"Quiz question: horizontal overflow at {label} ({width}×{height})");
-
-            await TakeScreenshotAsync(page, $"quiz-question-{label}");
         }
 
         // ── Quiz page — info card visible ─────────────────────────────────────────
@@ -85,6 +85,8 @@ namespace ChimQuiz.UITests.Tests
                 new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 5_000 });
 
             // Info card must fit inside its container without causing scroll
+            await TakeScreenshotAsync(page, $"quiz-infocard-{label}");
+
             bool cardFits = await page.EvalOnSelectorAsync<bool>(
                 "#question-card",
                 "el => el.scrollHeight <= el.clientHeight + 2");  // +2px tolerance for rounding
@@ -95,8 +97,29 @@ namespace ChimQuiz.UITests.Tests
                 "document.documentElement.scrollWidth > document.documentElement.clientWidth");
             Assert.False(overflows,
                 $"Info card: horizontal overflow at {label} ({width}×{height})");
+        }
 
-            await TakeScreenshotAsync(page, $"quiz-infocard-{label}");
+        // ── Leaderboard page ──────────────────────────────────────────────────────
+
+        [Theory]
+        [MemberData(nameof(Viewports))]
+        public async Task LeaderboardPage_NoHorizontalOverflow(int width, int height, string label)
+        {
+            await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
+                new BrowserNewContextOptions
+                {
+                    ViewportSize = new ViewportSize { Width = width, Height = height },
+                });
+            IPage page = await ctx.NewPageAsync();
+            await page.GotoAsync(_factory.ServerAddress + "/leaderboard");
+            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+            await TakeScreenshotAsync(page, $"leaderboard-{label}");
+
+            bool overflows = await page.EvaluateAsync<bool>(
+                "document.documentElement.scrollWidth > document.documentElement.clientWidth");
+            Assert.False(overflows,
+                $"Leaderboard page: horizontal overflow at {label} ({width}×{height})");
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────────
