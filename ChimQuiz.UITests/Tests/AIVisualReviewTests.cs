@@ -95,6 +95,13 @@ namespace ChimQuiz.UITests.Tests
                 {
                     images.Add((path, $"{pageLabel} — {viewport}"));
                 }
+
+                // Screenshot bonus (+5XP disponible après 6 s) si présent
+                string bonusPath = Path.Combine(ScreenshotsDir, $"{prefix}-bonus-{viewport}.png");
+                if (File.Exists(bonusPath))
+                {
+                    images.Add((bonusPath, $"{pageLabel} — {viewport} (+5XP bonus)"));
+                }
             }
 
             report.AppendLine(CultureInfo.InvariantCulture, $"## {pageLabel}");
@@ -154,13 +161,17 @@ namespace ChimQuiz.UITests.Tests
                 "name-to-symbol-typed",
                 "symbol-to-name-typed",
             ];
+            string[] viewports = ["mobile", "tablet", "laptop", "desktop"];
             List<(string Path, string Label)> images = [];
             foreach (string type in types)
             {
-                string path = Path.Combine(ScreenshotsDir, $"quiz-type-{type}.png");
-                if (File.Exists(path))
+                foreach (string viewport in viewports)
                 {
-                    images.Add((path, type));
+                    string path = Path.Combine(ScreenshotsDir, $"quiz-type-{type}-{viewport}.png");
+                    if (File.Exists(path))
+                    {
+                        images.Add((path, $"{type} — {viewport}"));
+                    }
                 }
             }
 
@@ -176,8 +187,9 @@ namespace ChimQuiz.UITests.Tests
 
             string prompt = $"""
                 Tu es expert en UX et contrôle qualité visuel pour applications web.
-                Les images ci-dessus montrent les {images.Count} type(s) de questions présents dans ChimQuiz
-                (quiz de chimie pour lycéens français), tous capturés sur mobile (390px).
+                Les images ci-dessus montrent les types de questions présents dans ChimQuiz
+                (quiz de chimie pour lycéens français), capturés aux viewports mobile (390px),
+                tablette (768px), laptop (1280px) et desktop (1920px).
 
                 Les 4 types possibles sont :
                 - name-to-symbol-mcq : on affiche le NOM de l'élément, on choisit parmi 4 SYMBOLES (MCQ)

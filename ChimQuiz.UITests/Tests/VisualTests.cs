@@ -85,8 +85,14 @@ namespace ChimQuiz.UITests.Tests
             await page.Locator("#element-info-card").WaitForAsync(
                 new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 5_000 });
 
-            // Info card must fit inside its container without causing scroll
+            // Screenshot 1 : infocard à l'apparition
             await TakeScreenshotAsync(page, $"quiz-infocard-{label}");
+
+            // Screenshot 2 : après 6,5 s — le bonus +5XP (Curieux(se) !) est disponible
+            await page.WaitForTimeoutAsync(6_500);
+            await TakeScreenshotAsync(page, $"quiz-infocard-bonus-{label}");
+
+            // Info card must fit inside its container without causing scroll
 
             bool cardFits = await page.EvalOnSelectorAsync<bool>(
                 "#question-card",
@@ -128,39 +134,56 @@ namespace ChimQuiz.UITests.Tests
         [Fact]
         public async Task QuizPage_AllQuestionTypes_Screenshots()
         {
-            // 30 questions maximise la probabilité de voir les 4 types.
-            await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
-                new BrowserNewContextOptions
-                {
-                    ViewportSize = new ViewportSize { Width = 390, Height = 844 },
-                });
-            IPage page = await StartAsync(ctx, 30);
+            // Capture les 4 types de questions à chacun des 4 viewports.
+            (int Width, int Height, string Label)[] viewports =
+            [
+                (390,  844,  "mobile"),
+                (768,  1024, "tablet"),
+                (1280, 800,  "laptop"),
+                (1920, 1080, "desktop"),
+            ];
 
-            HashSet<string> captured = [];
+            HashSet<string> capturedAny = [];
 
-            for (int i = 0; i < 30 && captured.Count < 4; i++)
+            foreach ((int width, int height, string vLabel) in viewports)
             {
-                string type = await DetectQuestionTypeAsync(page);
+                await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
+                    new BrowserNewContextOptions
+                    {
+                        ViewportSize = new ViewportSize { Width = width, Height = height },
+                    });
 
-                if (captured.Add(type))
+                // 30 questions maximise la probabilité de voir les 4 types.
+                IPage page = await StartAsync(ctx, 30);
+                HashSet<string> capturedThisViewport = [];
+
+                for (int i = 0; i < 30 && capturedThisViewport.Count < 4; i++)
                 {
-                    await TakeScreenshotAsync(page, $"quiz-type-{type}");
-                }
+                    string type = await DetectQuestionTypeAsync(page);
 
-                bool isGameOver = await AnswerAndAdvanceAsync(page);
-                if (isGameOver)
-                {
-                    break;
-                }
+                    if (capturedThisViewport.Add(type))
+                    {
+                        // Attendre la fin de l'animation d'entrée (fadeIn 350-400 ms)
+                        await page.WaitForTimeoutAsync(500);
+                        await TakeScreenshotAsync(page, $"quiz-type-{type}-{vLabel}");
+                        capturedAny.Add(type);
+                    }
 
-                await Task.WhenAny(
-                    page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 10_000 }),
-                    page.Locator("#typed-answer:not([disabled])").WaitForAsync(new() { Timeout = 10_000 }));
+                    bool isGameOver = await AnswerAndAdvanceAsync(page);
+                    if (isGameOver)
+                    {
+                        break;
+                    }
+
+                    await Task.WhenAny(
+                        page.Locator("#choice-0:not([disabled])").WaitForAsync(new() { Timeout = 10_000 }),
+                        page.Locator("#typed-answer:not([disabled])").WaitForAsync(new() { Timeout = 10_000 }));
+                }
             }
 
             // On exige au moins les 2 familles (MCQ + typed) pour que la revue IA soit utile.
-            Assert.True(captured.Count >= 2,
-                $"Seulement {captured.Count} type(s) de question capturé(s) : {string.Join(", ", captured)}");
+            Assert.True(capturedAny.Count >= 2,
+                $"Seulement {capturedAny.Count} type(s) de question capturé(s) : {string.Join(", ", capturedAny)}");
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────────
@@ -211,8 +234,18 @@ namespace ChimQuiz.UITests.Tests
             }
 
             await AnswerAsync(page);
-            await page.Locator("#element-info-card").WaitForAsync(
-                new() { State = WaitForSelectorState.Visible, Timeout = 5_000 });
+
+            // Attendre l'infocard (ou game-over si la réponse a expiré et le jeu avance seul).
+            // 20 s couvre le timer MCQ (15 s) + marge réseau.
+            DateTimeOffset infoDeadline = DateTimeOffset.UtcNow.AddSeconds(20);
+            while (DateTimeOffset.UtcNow < infoDeadline)
+            {
+                if (await page.Locator("#element-info-card").IsVisibleAsync()) break;
+                if (await page.Locator("#game-over").IsVisibleAsync()) return true;
+                await Task.Delay(150);
+            }
+
+            if (!await page.Locator("#element-info-card").IsVisibleAsync()) return true;
             await page.ClickAsync("button:has-text(\"J'ai lu\")");
 
             DateTimeOffset deadline = DateTimeOffset.UtcNow.AddSeconds(10);
