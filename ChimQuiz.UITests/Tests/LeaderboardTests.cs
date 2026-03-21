@@ -2,6 +2,7 @@ namespace ChimQuiz.UITests.Tests
 {
 #pragma warning disable CA1001 // factory is disposed via IAsyncLifetime.DisposeAsync
 
+    [Collection("UITests")]
     public sealed class LeaderboardTests : IAsyncLifetime
     {
         private readonly PlaywrightWebApplicationFactory _factory = new();

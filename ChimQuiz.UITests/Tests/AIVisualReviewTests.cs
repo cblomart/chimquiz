@@ -10,6 +10,7 @@ namespace ChimQuiz.UITests.Tests
     /// Prérequis : avoir exécuté les VisualTests au préalable pour générer les screenshots.
     /// Lancement : ANTHROPIC_API_KEY=sk-... dotnet test --filter Category=AIReview
     /// </summary>
+    [Collection("UITests")]
     [Trait("Category", "AIReview")]
     public sealed class AIVisualReviewTests
     {
