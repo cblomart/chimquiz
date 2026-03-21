@@ -83,7 +83,10 @@ namespace ChimQuiz.UITests.Tests
             await page.Locator("#element-info-card").WaitForAsync(
                 new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 5_000 });
 
-            // Screenshot 1 : infocard à l'apparition
+            // Laisser les animations flottantes (xpPop 1.2s) se terminer avant le screenshot
+            await page.WaitForTimeoutAsync(1_500);
+
+            // Screenshot 1 : infocard après stabilisation des animations
             await TakeScreenshotAsync(page, $"quiz-infocard-{label}");
 
             // Screenshot 2 : après 6,5 s — le bonus +5XP (Curieux(se) !) est disponible
