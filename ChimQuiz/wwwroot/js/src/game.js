@@ -334,10 +334,8 @@ function showInfoCard(result) {
     const card = document.getElementById('element-info-card');
     if (!card) return;
 
-    ['question-area', 'choices-grid', 'typed-input-area', 'question-timer-area'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.visibility = 'hidden';
-    });
+    const questionCard = document.getElementById('question-card');
+    if (questionCard) questionCard.classList.add('quiz-active-info');
 
     setElementIdentity(result);
     renderVerdict(result);
@@ -375,11 +373,8 @@ function showInfoCard(result) {
 function hideInfoCard() {
     const card = document.getElementById('element-info-card');
     if (card) card.style.display = 'none';
-    // Restore question area visibility
-    ['question-area', 'choices-grid', 'typed-input-area', 'question-timer-area'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.visibility = '';
-    });
+    const questionCard = document.getElementById('question-card');
+    if (questionCard) questionCard.classList.remove('quiz-active-info');
     // Reset bonus button
     const nextBtn    = document.querySelector('.info-next-btn');
     const bonusLabel = document.getElementById('info-bonus-label');
