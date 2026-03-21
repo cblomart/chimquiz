@@ -127,10 +127,10 @@ namespace ChimQuiz.UITests.Tests
         [Fact]
         public async Task QuizPage_NameToSymbolTyped_HasMaxLength3AndSymbolPlaceholder()
         {
-            IPage page = await StartAsync();
+            // Use 15 questions to guarantee at least one NameToSymbolTyped appears.
+            IPage page = await StartAsync(15);
 
-            // Loop through all 5 questions to find the NameToSymbolTyped one (maxlength=3)
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 15; i++)
             {
                 bool typedVisible = await page.Locator("#typed-answer").IsVisibleAsync();
                 if (typedVisible)
@@ -155,7 +155,7 @@ namespace ChimQuiz.UITests.Tests
                 await WaitForNextInputAsync(page);
             }
 
-            Assert.Fail("No NameToSymbolTyped question (maxlength=3) found in 5-question game");
+            Assert.Fail("No NameToSymbolTyped question (maxlength=3) found in 15-question game");
         }
 
         // ── Info card content ─────────────────────────────────────────────────────
@@ -222,14 +222,14 @@ namespace ChimQuiz.UITests.Tests
 
         // ── Helpers ───────────────────────────────────────────────────────────────
 
-        /// <summary>Registers a unique player, picks 5 questions, navigates to quiz, waits for Q1.</summary>
-        private async Task<IPage> StartAsync()
+        /// <summary>Registers a unique player, picks questions, navigates to quiz, waits for Q1.</summary>
+        private async Task<IPage> StartAsync(int questionCount = 5)
         {
             IBrowserContext ctx = await _factory.Browser.NewContextAsync();
             IPage page = await ctx.NewPageAsync();
 
             await page.GotoAsync(_factory.ServerAddress);
-            await page.ClickAsync("[data-count='5']");
+            await page.ClickAsync($"[data-count='{questionCount}']");
 
             string pseudo = "UITest_" + Guid.NewGuid().ToString("N")[..8];
             await page.FillAsync("#pseudo-input", pseudo);
