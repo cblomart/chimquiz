@@ -54,16 +54,17 @@ function renderLeaderboard(tab, scores) {
             ? `<td class="rank-cell ${rankClasses[i]}">${rankIcons[i]}</td>`
             : `<td class="rank-cell">${i + 1}</td>`;
 
+        const scoreStr = s.score === 0 ? '—' : `${s.score} XP`;
         const scoreCls = s.score === 0 ? ' score-cell--zero' : '';
         return isAlltime
             ? `<tr${isMe ? ' class="is-me"' : ''}>${rankCell}
                 <td class="pseudo-cell">${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></td>
-                <td class="score-cell${scoreCls}">${s.score} XP</td>
+                <td class="score-cell${scoreCls}">${scoreStr}</td>
                 <td class="rank-name-cell">${escHtml(s.rankName)}</td>
                 <td class="streak-cell">🔥 ${s.currentStreak}</td></tr>`
             : `<tr${isMe ? ' class="is-me"' : ''}>${rankCell}
                 <td class="pseudo-cell">${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></td>
-                <td class="score-cell${scoreCls}">${s.score} XP</td>
+                <td class="score-cell${scoreCls}">${scoreStr}</td>
                 <td>${s.correctAnswers}/15 ✅</td>
                 <td>Combo x${s.maxCombo}</td></tr>`;
     }).join('');
