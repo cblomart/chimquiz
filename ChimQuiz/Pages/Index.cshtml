@@ -87,13 +87,33 @@
                 />
                 <div id="pseudo-error" class="input-error" style="display:none;"></div>
                 <p class="pseudo-hint">🔒 Ton pseudo est unique — personne ne peut te le voler.</p>
-                <label class="input-label" for="question-count">Nombre de questions</label>
-                <div class="question-count-selector" id="question-count" role="group" aria-label="Nombre de questions">
-                    <button type="button" class="qcount-btn" data-count="5">5</button>
-                    <button type="button" class="qcount-btn" data-count="10">10</button>
-                    <button type="button" class="qcount-btn qcount-btn--active" data-count="15">15</button>
-                    <button type="button" class="qcount-btn" data-count="20">20</button>
-                    <button type="button" class="qcount-btn" data-count="30">30</button>
+                <label class="input-label" for="question-count">Mode de jeu</label>
+                <div class="question-count-selector" id="question-count" role="group" aria-label="Mode de jeu">
+                    <button type="button" class="qcount-btn" data-count="5">
+                        <span class="qcount-emoji">⚡</span>
+                        <span class="qcount-name">Sprint</span>
+                        <span class="qcount-count">5 questions</span>
+                    </button>
+                    <button type="button" class="qcount-btn" data-count="10">
+                        <span class="qcount-emoji">🎯</span>
+                        <span class="qcount-name">Rapide</span>
+                        <span class="qcount-count">10 questions</span>
+                    </button>
+                    <button type="button" class="qcount-btn qcount-btn--active" data-count="15">
+                        <span class="qcount-emoji">🧪</span>
+                        <span class="qcount-name">Normal</span>
+                        <span class="qcount-count">15 questions</span>
+                    </button>
+                    <button type="button" class="qcount-btn" data-count="20">
+                        <span class="qcount-emoji">💪</span>
+                        <span class="qcount-name">Intense</span>
+                        <span class="qcount-count">20 questions</span>
+                    </button>
+                    <button type="button" class="qcount-btn" data-count="30">
+                        <span class="qcount-emoji">🔥</span>
+                        <span class="qcount-name">Marathon</span>
+                        <span class="qcount-count">30 questions</span>
+                    </button>
                 </div>
                 <button id="start-btn" class="btn btn-primary btn-large">
                     <span class="btn-icon">⚡</span>
