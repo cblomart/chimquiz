@@ -58,7 +58,7 @@ function renderLeaderboard(tab, scores) {
         const scoreCls = s.score === 0 ? ' score-cell--zero' : '';
         return isAlltime
             ? `<tr${isMe ? ' class="is-me"' : ''}>${rankCell}
-                <td class="pseudo-cell">${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></td>
+                <td class="pseudo-cell"><div><span>${escHtml(s.rankEmoji)} <strong>${escHtml(s.pseudo)}</strong></span><div class="rank-sub">${escHtml(s.rankName)}</div></div></td>
                 <td class="score-cell${scoreCls}">${scoreStr}</td>
                 <td class="rank-name-cell">${escHtml(s.rankName)}</td>
                 <td class="streak-cell">🔥 ${s.currentStreak}</td></tr>`
