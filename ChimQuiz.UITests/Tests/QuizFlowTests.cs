@@ -266,12 +266,24 @@ namespace ChimQuiz.UITests.Tests
             DateTimeOffset infoDeadline = DateTimeOffset.UtcNow.AddSeconds(20);
             while (DateTimeOffset.UtcNow < infoDeadline)
             {
-                if (await page.Locator("#element-info-card").IsVisibleAsync()) break;
-                if (await page.Locator("#game-over").IsVisibleAsync()) return true;
+                if (await page.Locator("#element-info-card").IsVisibleAsync())
+                {
+                    break;
+                }
+
+                if (await page.Locator("#game-over").IsVisibleAsync())
+                {
+                    return true;
+                }
+
                 await Task.Delay(150);
             }
 
-            if (!await page.Locator("#element-info-card").IsVisibleAsync()) return true;
+            if (!await page.Locator("#element-info-card").IsVisibleAsync())
+            {
+                return true;
+            }
+
             await page.ClickAsync("button:has-text(\"J'ai lu\")");
 
             // Poll until info card hides (next question) or game-over overlay appears.
