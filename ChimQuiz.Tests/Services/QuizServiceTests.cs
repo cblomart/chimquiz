@@ -102,12 +102,13 @@ namespace ChimQuiz.Tests.Services
         public void GenerateQuestions_Apprenti_DistributionMatchesExpected()
         {
             // 0 XP → (maxZ=20, N2S=6, S2N=6, Typed=3) for 15 questions
+            // Typed budget is split: SymbolToNameTyped + NameToSymbolTyped → use IsTyped
             FakeSession session = NewSession();
             QuizSessionState state = _svc.StartNewSession(session, _playerId, playerXp: 0, questionCount: 15);
 
-            int n2s = state.Questions.Count(q => q.Type == QuestionType.NameToSymbol);
-            int s2n = state.Questions.Count(q => q.Type == QuestionType.SymbolToName);
-            int typed = state.Questions.Count(q => q.Type == QuestionType.SymbolToNameTyped);
+            int n2s   = state.Questions.Count(q => q.Type == QuestionType.NameToSymbol);
+            int s2n   = state.Questions.Count(q => q.Type == QuestionType.SymbolToName);
+            int typed = state.Questions.Count(q => q.IsTyped);
 
             Assert.Equal(6, n2s);
             Assert.Equal(6, s2n);
