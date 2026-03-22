@@ -163,7 +163,7 @@ jobs:
         run: pwsh ChimQuiz.UITests/bin/Debug/net9.0/playwright.ps1 install chromium --with-deps
 
       - name: Run UI tests
-        run: dotnet test ChimQuiz.UITests/ --no-build --logger "console;verbosity=minimal"
+        run: dotnet test ChimQuiz.UITests/ --no-build --logger "console;verbosity=minimal" --filter "Category!=AIReview"
 
       - name: Upload visual screenshots
         if: always()

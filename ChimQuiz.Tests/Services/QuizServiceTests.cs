@@ -106,8 +106,8 @@ namespace ChimQuiz.Tests.Services
             FakeSession session = NewSession();
             QuizSessionState state = _svc.StartNewSession(session, _playerId, playerXp: 0, questionCount: 15);
 
-            int n2s   = state.Questions.Count(q => q.Type == QuestionType.NameToSymbol);
-            int s2n   = state.Questions.Count(q => q.Type == QuestionType.SymbolToName);
+            int n2s = state.Questions.Count(q => q.Type == QuestionType.NameToSymbol);
+            int s2n = state.Questions.Count(q => q.Type == QuestionType.SymbolToName);
             int typed = state.Questions.Count(q => q.IsTyped);
 
             Assert.Equal(6, n2s);

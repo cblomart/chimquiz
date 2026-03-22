@@ -187,6 +187,156 @@ namespace ChimQuiz.UITests.Tests
                 $"Seulement {capturedAny.Count} type(s) de question capturé(s) : {string.Join(", ", capturedAny)}");
         }
 
+        // ── Home page — éléments clés visibles sans scroll ───────────────────────
+
+        [Theory]
+        [MemberData(nameof(Viewports))]
+        public async Task HomePage_StartButtonInViewport(int width, int height, string label)
+        {
+            await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
+                new BrowserNewContextOptions
+                {
+                    ViewportSize = new ViewportSize { Width = width, Height = height },
+                });
+            IPage page = await ctx.NewPageAsync();
+            await page.GotoAsync(_factory.ServerAddress);
+            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+            // Le bouton "Jouer !" doit être entièrement visible sans scroll
+            bool startBtnVisible = await page.EvaluateAsync<bool>(@"() => {
+                const el = document.getElementById('start-btn');
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.top >= 0 && r.bottom <= window.innerHeight && r.left >= 0 && r.right <= window.innerWidth;
+            }");
+            Assert.True(startBtnVisible,
+                $"Home: #start-btn not fully in viewport at {label} ({width}×{height})");
+
+            // Le champ pseudo et le sélecteur de mode doivent aussi être visibles
+            bool pseudoVisible = await page.EvaluateAsync<bool>(@"() => {
+                const el = document.getElementById('pseudo-input');
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.top >= 0 && r.bottom <= window.innerHeight;
+            }");
+            Assert.True(pseudoVisible,
+                $"Home: #pseudo-input not in viewport at {label} ({width}×{height})");
+        }
+
+        // ── Quiz page — éléments d'interaction visibles ───────────────────────────
+
+        [Theory]
+        [MemberData(nameof(Viewports))]
+        public async Task QuizPage_InteractionElementsVisible(int width, int height, string label)
+        {
+            await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
+                new BrowserNewContextOptions
+                {
+                    ViewportSize = new ViewportSize { Width = width, Height = height },
+                });
+            IPage page = await StartAsync(ctx);
+
+            // Le prompt de question doit être visible
+            bool promptVisible = await page.EvaluateAsync<bool>(@"() => {
+                const el = document.getElementById('question-prompt');
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.top >= 0 && r.bottom <= window.innerHeight;
+            }");
+            Assert.True(promptVisible,
+                $"Quiz: #question-prompt not in viewport at {label} ({width}×{height})");
+
+            // Soit les choix MCQ soit le champ typed doivent être dans le viewport
+            bool interactionVisible = await page.EvaluateAsync<bool>(@"() => {
+                const grid = document.getElementById('choices-grid');
+                const typed = document.getElementById('typed-answer');
+                const el = (grid && grid.style.display !== 'none') ? grid : typed;
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.top >= 0 && r.bottom <= window.innerHeight;
+            }");
+            Assert.True(interactionVisible,
+                $"Quiz: interaction area (choices/input) not in viewport at {label} ({width}×{height})");
+
+            // La barre de progression / timer doit être visible
+            bool timerVisible = await page.EvaluateAsync<bool>(@"() => {
+                const el = document.getElementById('question-timer-area');
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.top >= 0 && r.bottom <= window.innerHeight;
+            }");
+            Assert.True(timerVisible,
+                $"Quiz: #question-timer-area not in viewport at {label} ({width}×{height})");
+        }
+
+        // ── Info card — éléments clés présents ───────────────────────────────────
+
+        [Theory]
+        [MemberData(nameof(Viewports))]
+        public async Task QuizPage_InfoCard_KeyElementsPresent(int width, int height, string label)
+        {
+            await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
+                new BrowserNewContextOptions
+                {
+                    ViewportSize = new ViewportSize { Width = width, Height = height },
+                });
+            IPage page = await StartAsync(ctx);
+            await AnswerAsync(page);
+
+            await page.Locator("#element-info-card").WaitForAsync(
+                new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 5_000 });
+
+            // Le nom de l'élément doit être présent et non vide
+            string? elementName = await page.Locator("#info-name").TextContentAsync(
+                new LocatorTextContentOptions { Timeout = 5_000 });
+            Assert.False(string.IsNullOrWhiteSpace(elementName),
+                $"Info card: #info-name is empty at {label}");
+
+            // Le bouton "J'ai lu" doit être visible et cliquable
+            bool nextBtnVisible = await page.EvaluateAsync<bool>(@"() => {
+                const el = document.querySelector('.info-next-btn');
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.top >= 0 && r.bottom <= window.innerHeight;
+            }");
+            Assert.True(nextBtnVisible,
+                $"Info card: .info-next-btn not in viewport at {label} ({width}×{height})");
+
+            // Le verdict (correct/incorrect) doit être affiché
+            bool verdictVisible = await page.Locator("#answer-verdict").IsVisibleAsync();
+            Assert.True(verdictVisible,
+                $"Info card: #answer-verdict not visible at {label}");
+        }
+
+        // ── Leaderboard — table non vide ──────────────────────────────────────────
+
+        [Theory]
+        [MemberData(nameof(Viewports))]
+        public async Task LeaderboardPage_TableRendered(int width, int height, string label)
+        {
+            await using IBrowserContext ctx = await _factory.Browser.NewContextAsync(
+                new BrowserNewContextOptions
+                {
+                    ViewportSize = new ViewportSize { Width = width, Height = height },
+                });
+            IPage page = await ctx.NewPageAsync();
+            await page.GotoAsync(_factory.ServerAddress + "/leaderboard");
+            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+            // La page doit afficher soit une table soit le message "aucune partie"
+            bool hasContent = await page.EvaluateAsync<bool>(@"() =>
+                document.querySelector('.leaderboard-table') !== null ||
+                document.querySelector('.leaderboard-empty') !== null");
+            Assert.True(hasContent,
+                $"Leaderboard: no table and no empty state at {label}");
+
+            // Les onglets de navigation doivent être présents
+            bool tabsPresent = await page.EvaluateAsync<bool>(@"() =>
+                document.querySelectorAll('.tab-btn').length === 2");
+            Assert.True(tabsPresent,
+                $"Leaderboard: expected 2 tab buttons at {label}");
+        }
+
         // ── Helpers ───────────────────────────────────────────────────────────────
 
         private async Task<IPage> StartAsync(IBrowserContext ctx, int questionCount = 5)
@@ -241,12 +391,24 @@ namespace ChimQuiz.UITests.Tests
             DateTimeOffset infoDeadline = DateTimeOffset.UtcNow.AddSeconds(20);
             while (DateTimeOffset.UtcNow < infoDeadline)
             {
-                if (await page.Locator("#element-info-card").IsVisibleAsync()) break;
-                if (await page.Locator("#game-over").IsVisibleAsync()) return true;
+                if (await page.Locator("#element-info-card").IsVisibleAsync())
+                {
+                    break;
+                }
+
+                if (await page.Locator("#game-over").IsVisibleAsync())
+                {
+                    return true;
+                }
+
                 await Task.Delay(150);
             }
 
-            if (!await page.Locator("#element-info-card").IsVisibleAsync()) return true;
+            if (!await page.Locator("#element-info-card").IsVisibleAsync())
+            {
+                return true;
+            }
+
             await page.ClickAsync("button:has-text(\"J'ai lu\")");
 
             DateTimeOffset deadline = DateTimeOffset.UtcNow.AddSeconds(10);
